@@ -22,10 +22,6 @@ module.exports = {
       chunks:['ui']
     }),
     new HtmlInlineScriptPlugin()
-  ],
-  optimization: {
-    minimize: false
-  },
-  
+  ],  
   performance: { hints: false }
 };

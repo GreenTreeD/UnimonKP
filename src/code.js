@@ -153,16 +153,19 @@ figma.ui.onmessage = async (msg) => {
       const kpFrames = page.findAll(
         node =>
           node.type === "FRAME" &&
-          /^KP\d+$/.test(node.name)
+          /^(MaaSKP|KP)\d+$/.test(node.name)
       );
-      kpFrames.forEach(frame => frame.remove());
+      for (const frame of kpFrames) {
+        frame.remove()
+        yieldToFigma();
+      }
+      
       figma.notify("Старые КП удалены");
       break;
     }
     case "deleteOld" : {
-      const pagesToRemove = figma.root.children.filter(page =>
-        page.name.includes("Презентация")
-      )
+      const newRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$");;
+      const pagesToRemove = figma.root.children.filter(page => newRegex.test(page.name));
       if (pagesToRemove.length === 0) {
         //figma.notify('Страницы с названием "Презентация" не найдены');
         return;
@@ -177,8 +180,12 @@ figma.ui.onmessage = async (msg) => {
           return;
         }
         await figma.setCurrentPageAsync(anotherPage);
+        yieldToFigma();
       }
-      pagesToRemove.forEach(page => page.remove());
+      for (let page of pagesToRemove) {
+        page.remove();
+        yieldToFigma();
+      }
       figma.notify("Старые презентации удалены");
       break;
     }
@@ -201,7 +208,7 @@ figma.ui.onmessage = async (msg) => {
         yieldToFigma();
       }
 
-      figma.ui.postMessage({ type: "imagesReady", data: images });
+      figma.ui.postMessage({ type: "imagesReady", data: {images:images, name:pagename } });
       break;
     }
     case "getOldPresentations": {

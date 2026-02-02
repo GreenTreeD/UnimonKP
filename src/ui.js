@@ -5,65 +5,8 @@ function showScreen(screenId) {
     document.getElementById(screenId).style.display = 'block';
 }
 
-/*
-function renderSlides(presentationList) {
-    const slidesList = document.querySelector(".slidesList");
-    slidesList.innerHTML = "";
-    presentationList.forEach(presentation => {
-    const presentDiv = document.createElement("div");
-    presentDiv.style.display = 'none';
-    presentation.forEach(slide => {
-
-    });
-    });
-    
-    slides.forEach(slide => {
-    const row = document.createElement("div");
-    row.className = "slideRow";
-    
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = slide.selected;
-    checkbox.onchange = () => slide.selected = checkbox.checked;
-    checkbox.id = slide['id'];
-    var img = document.createElement('img');
-    img.src = slide['img'];
-    img.className = "slidePreview";
-    
-    row.appendChild(checkbox);
-    row.appendChild(img);
-    slidesList.appendChild(row);
-    });
-}
-
-renderSlides(slides);
-*/
-
-/*document.getElementById('deleteOld').addEventListener("click", () => {
-    parent.postMessage(
-        {
-        pluginMessage: {
-            type: "deleteOld",
-        }
-        },
-        "*"
-    );
-});
-
-document.getElementById('deleteKP').addEventListener("click", () => {
-    parent.postMessage(
-        {
-        pluginMessage: {
-            type: "deleteKP",
-        }
-        },
-        "*"
-    );
-});
-*/
-
 async function createPdf(images, name) {
-    
+
     const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
@@ -151,13 +94,12 @@ window.onmessage = async (event) => {
     switch (msg.type) {
         case "slides": {
             const data = JSON.parse(msg.data);
-            //console.log(data);
             const names = data.map(item => item.section);
             data.forEach(presentation => {
                 let tmp = new Map(presentation.slides.map(([key, value]) => [Number(key), value]));
                 presentations.push(tmp);
             });
-            select = document.getElementById("presentationSelect");
+            let select = document.getElementById("presentationSelect");
             let i = 0;
             names.forEach(name => {
                 const option = document.createElement('option');
@@ -167,6 +109,19 @@ window.onmessage = async (event) => {
                 i += 1;
             });
             showScreen("first");
+            break;
+        }
+        case "showOldPresentations": {
+            const oldSelect = document.getElementById("oldPresentations");
+            const data = JSON.parse(msg.data);
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                oldSelect.appendChild(option);
+            });
+            showScreen("fifth");
+
             break;
         }
         case "presentationCreated": {
@@ -179,15 +134,22 @@ window.onmessage = async (event) => {
             break;
         }
         case "imagesReady": {
-            await createPdf(msg.data, document.getElementById('presentationName').innerHTML);
-            parent.postMessage(
-                {
-                    pluginMessage: {
+            try {
+                await createPdf(msg.data.images, msg.data.name);
+                parent.postMessage(
+                    {
+                        pluginMessage: {
                         type: "thatsAll",
-                    }
-                },
-                "*"
-            );
+                        }
+                    },
+                    "*"
+                );
+            }
+            catch(error) {
+                console.log(error);
+                document.getElementById("errorMessage").innerHTML = error;
+                showScreen("forth");
+            }
             break;
         }
         default: {
@@ -196,24 +158,44 @@ window.onmessage = async (event) => {
     }
 };
 
-window.addEventListener("DOMContentLoaded", () => {
-    
-});
-
-document.getElementById('parserButton').addEventListener("click", somefunction );
-
-document.getElementById('savePDF').addEventListener("click", () => {
+function savePDF (prName) {
     showScreen("second");
     parent.postMessage(
         {
             pluginMessage: {
                 type: "getImages",
-                data: document.getElementById('presentationName').innerHTML
+                data: prName
             }
         },
         "*"
     );
+}
+
+
+window.addEventListener("DOMContentLoaded", (event) => {
+    
+    document.getElementById('savePDF').addEventListener("click", () => {
+        savePDF(document.getElementById('presentationName').innerHTML);
+    });
+    document.getElementById('parserButton').addEventListener("click", somefunction);
+    document.getElementById('otherbuttons').addEventListener("click", () => {
+        showScreen("second");
+        parent.postMessage({
+            pluginMessage: { type: "getOldPresentations" }
+        }, "*");
+    });
+    document.getElementById('saveOtherPDF').addEventListener("click", () => savePDF(document.getElementById('oldPresentations').value));
+    document.getElementById('deleteOld').addEventListener("click", () => {
+        parent.postMessage(
+            { pluginMessage: { type: "deleteOld" } }, "*"
+        );
+    });
+    document.getElementById('deleteKP').addEventListener("click", () => {
+        parent.postMessage(
+            { pluginMessage: { type: "deleteKP" } }, "*"
+        );
+    });
+    showScreen("second");
 });
+
 let presentations = [];
-showScreen("second");
-console.log("АЛООО БЛЯЯЯ");

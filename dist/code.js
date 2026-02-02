@@ -1,1 +1,540 @@
-(()=>{"use strict";let e=null;const n=()=>new Promise(e=>setTimeout(e,0));function t(e){return e.toString().replace(/\B(?=(\d{3})+(?!\d))/g," ")}function a(){const e=figma.createRectangle();return e.resize(1030,2),e.fills=[{type:"SOLID",color:{r:198/255,g:207/255,b:213/255}}],e}function i(e){const t=e.children;if(t.length>0){const e=t[t.length-1];n(),e.remove()}}async function r(e,n,t){const a=e.findOne(e=>"TEXT"===e.type&&e.name===n);return!!a&&(await figma.loadFontAsync(a.fontName),a.characters=t,!0)}function o(e){let t;return figma.root.children.find(e=>"Presentations"==e.name).children.forEach(n=>{const a=n.children.find(n=>n.id==String(e));a&&(t=a)}),n(),t}!async function(){figma.notify("Загрузка плагина, всё нормик :)");const t=await async function(){await figma.loadAllPagesAsync();const t=figma.root.children.find(e=>"Assets"===e.name);if(!t)return!1;e={variantsProduct:figma.root.findOne(e=>"COMPONENT_SET"===e.type&&"Product"===e.name),contactSlides:t.findOne(e=>"SECTION"===e.type&&"ContactSlides"===e.name),productSlides:t.findOne(e=>"SECTION"===e.type&&"productSlides"===e.name),MaaSpage:t.findOne(e=>"FRAME"===e.type&&"MaaSdesc"===e.name)},n();const a=Object.values(e).every(Boolean);return e.allFound=a,e}();if(n(),!t.allFound)return void figma.notify("Нет ресурсов для КП");const a=await async function(){const e=figma.root.children.find(e=>"Presentations"===e.name);if(!e)throw figma.notify("Страница не найдена"),new Error("Page not found");const t=[],a=e.children.find(e=>"Презентация БАЗА"===e.name);let i=a.children.map(e=>[e.name,e.id]);return t.push({section:a.name,slides:i}),e.children.forEach(e=>{"Презентация БАЗА"!=e.name&&(i=e.children.map(e=>[e.name,e.id]),t.push({section:e.name,slides:i})),n()}),t}();a?(figma.showUI(__html__,{width:320,height:420}),figma.ui.postMessage({type:"slides",data:JSON.stringify(a)})):figma.notify("Нет ресурсов для КП")}(),figma.ui.onmessage=async s=>{switch(s.type){case"my-json":{const c=s.data;try{let s=figma.createPage(),l=new Date;if(s.name=String(`${c.client} ${String(l.getHours()).padStart(2,"0")}:${String(l.getMinutes()).padStart(2,"0")} ${String(l.getDate()).padStart(2,"0")}.${String(l.getMonth()+1).padStart(2,"0")}.${l.getFullYear()}`),!c.slides)throw figma.notify("Пустая презентация"),new Error("Empty presentation");let d=1,f=0;for(const e of c.slides){const t=o(e);if(!t)throw figma.notify("Нет слайда"),new Error(`No slide for ${e}`);const a=t.clone();a.name=`${d}`,s.appendChild(a),a.x=0,a.y=f,f+=a.height+60,d+=1,n()}if(c.ifMaas){const t=(null==e?null:e.MaaSpage).clone();s.appendChild(t),t.name=`${d}`,t.x=0,t.y=f,f+=t.height+60,d+=1,n()}const m=(await async function(o,s){let c;if(c=function(e){const t=figma.root.children.find(e=>"Assets"===e.name);if(!t)return null;const a=e?"MaaSKP_example":"KP_example",i=e?"MaaSKP":"KP",r=new RegExp(`^${i}\\d+$`),o=t.children.find(e=>"FRAME"===e.type&&e.name===a);if(n(),!o)return null;const s=t.children.filter(e=>"FRAME"===e.type&&r.test(e.name));let c=0;c=s.reduce((e,n)=>{const t=Number(n.name.replace(i,""));return Number.isNaN(t)?e:Math.max(e,t)},0);const l=c+1,d=o.clone();d.name=`${i}${l}`,o.parent.appendChild(d),n();const f=s.reduce((e,n)=>!e||n.y>e.y?n:e,null);return d.x=o.x,d.y=f?f.y+f.height+40:o.y+o.height+40,{frame:d,index:l}}(s),!c)throw figma.notify("Фрейм не найден"),new Error("Frame not found");const{frame:l,index:d}=c,f=l.findOne(e=>"KP_KV_products"===e.name),m=l.findOne(e=>"KP_KV_services"===e.name),u=l.findOne(e=>"annual_services"===e.name);n();let g=0,p=0;if(!o)return null;const h=null==e?null:e.variantsProduct;for(const e of o){let i=h.children.find(n=>n.variantProperties.Variant===e[0]);i||(i=h.children.find(e=>"Default"===e.variantProperties.Variant),figma.notify("Вариант не найден"));const r=i.createInstance();switch(e[0].slice(0,3)){case"US-":r.setProperties({"Value#70:5":t(e[1]*e[3])}),g+=e[1]*e[3],m.appendChild(r),m.appendChild(a());break;case"CC-":case"CL-":r.setProperties({"Count#70:3":String(e[1]),"Price#70:4":t(e[3]),"Value#70:5":t(e[1]*e[3])}),p+=e[1]*e[3],u.appendChild(r),u.appendChild(a());break;default:r.setProperties({"Count#70:3":String(e[1]),"Price#70:4":t(e[3]),"Value#70:5":t(e[1]*e[3])}),g+=e[1]*e[3],f.appendChild(r),f.appendChild(a())}n()}return i(m),i(u),i(f),0==m.children.length&&(m.visible=!1),await r(l,"sumKV",t(g)),await r(l,"sumAnnual",t(p)),n(),l}(c.products,c.ifMaas)).clone();s.appendChild(m),m.name=`${d}`,m.x=0,m.y=f,f+=m.height+60,d+=1,n();const u=null==e?null:e.productSlides;for(const e of c.products||[]){let t=u.findOne(n=>n.name===e[0]);if(t){const e=t.clone();s.appendChild(e),e.name=`${d}`,e.x=0,e.y=f,f+=e.height+60,d+=1}n()}const g=(null==e?null:e.contactSlides).children.find(e=>e.name===c.creator);if(!g)throw new Error("No contact slide");const p=g.clone();s.appendChild(p),p.name=`${d}`,p.x=0,p.y=f,n(),figma.ui.postMessage({type:"presentationCreated",data:s.name}),await figma.setCurrentPageAsync(s)}catch(e){console.error(e),figma.ui.postMessage({type:"showError",err:e})}break}case"deleteKP":figma.root.children.find(e=>"Assets"===e.name).findAll(e=>"FRAME"===e.type&&/^KP\d+$/.test(e.name)).forEach(e=>e.remove()),figma.notify("Старые КП удалены");break;case"deleteOld":{const e=figma.root.children.filter(e=>e.name.includes("Презентация"));if(0===e.length)return;const n=figma.currentPage;if(e.includes(n)){const n=figma.root.children.find(n=>!e.includes(n));if(!n)return void figma.notify("Нельзя удалить все страницы документа");await figma.setCurrentPageAsync(n)}e.forEach(e=>e.remove()),figma.notify("Старые презентации удалены");break}case"getImages":{const e=s.data,t=figma.root.children.find(n=>n.name===e);if(!t)return void figma.ui.postMessage({type:"showError",data:"Нет страницы с презентацией"});let a=[];for(const e of t.children){if("FRAME"===e.type){const n=await e.exportAsync({format:"PNG",scale:1});a.push({name:e.name,bytes:n})}n()}figma.ui.postMessage({type:"imagesReady",data:a});break}case"getOldPresentations":{const e=await async function(){const e=new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$"),n=figma.root.children.filter(n=>e.test(n.name));let t=[];for(const e of n)t.push({id:e.id,name:e.name});return t}();figma.ui.postMessage({type:"showOldPresentations",data:JSON.stringify(e)});break}case"thatsAll":figma.closePlugin();break;default:figma.notify("Ничего не произошло")}}})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+
+;// ./src/utils.js
+
+let state = null;
+
+const yieldToFigma = () =>  new Promise(resolve => setTimeout(resolve, 0));
+
+
+async function initResources() {
+  await figma.loadAllPagesAsync();
+  const assetsPage = figma.root.children.find(p => p.name === "Assets");
+  if (!assetsPage) return false;
+
+  state = {
+    // assetsPage,
+    variantsProduct: figma.root.findOne(n => n.type === "COMPONENT_SET" && n.name === "Product"), // компонент со строками для рассчёта
+    contactSlides: assetsPage.findOne(n => n.type === "SECTION" && n.name === "ContactSlides"), // контакты
+    productSlides: assetsPage.findOne(n => n.type === "SECTION" && n.name === "productSlides"), // слайды с подробным описанием продуктов
+    MaaSpage: assetsPage.findOne(n => n.type === "FRAME" && n.name === "MaaSdesc") // слайд для МааS
+  };
+  yieldToFigma();
+  
+  const allFound = Object.values(state).every(Boolean);
+  state.allFound = allFound;
+  return state;
+}
+
+
+function getMaaSpage () {
+  if (state == null) return null;
+  return state.MaaSpage;
+}
+
+function getProductSlides() {
+  if (state == null) return null;
+  return state.productSlides;
+}
+
+function getContactSlides() {
+  if (state == null) return null;
+  return state.contactSlides;
+}
+
+function getVariantsProduct() {
+  if (state == null) return null;
+  return state.variantsProduct;
+}
+
+
+function formatNumber(num) {
+  return num
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+
+
+/*async function collectSlidePreviews() {
+  const page = figma.root.children.find(p => p.name === "Presentations");
+  if (!page) {      
+    figma.notify("Страница не найдена");
+      throw new Error("Page not found");
+  }
+  
+  const slides = [];
+  page.children.forEach(section => {
+    let newPresentation = [];
+    let presentationName = section.name;
+    let i = 1;
+    section.children.forEach(async node => {
+      const preview = await node.exportAsync({
+        format: "PNG",
+        constraint: { type: "WIDTH", value: 100 }
+      });
+      newPresentation.push({
+        id:`{$presentationName}{$i}`,
+        preview: Array.from(new Uint8Array(preview))
+      });
+      i+=1;
+    });
+
+    slides.push({
+      prName: presentationName,
+      contents: newPresentation
+    });
+  });
+
+  figma.ui.postMessage({
+    type: "slides-preview",
+    slides
+  });
+}
+*/
+
+
+;// ./src/slides.js
+
+
+
+
+function createNextKP(ifMaas) {
+  const curPage = figma.root.children.find(p => p.name === "Assets");
+  if (!curPage) return null;
+
+  const templateName = ifMaas ? "MaaSKP_example" : "KP_example";
+  const prefix = ifMaas ? "MaaSKP" : "KP";
+  const regex = new RegExp(`^${prefix}\\d+$`);
+
+  const template = curPage.children.find(
+    n => n.type === "FRAME" && n.name === templateName
+  );
+  yieldToFigma();
+  
+  if (!template) return null;
+
+  const frames = curPage.children.filter(
+    n => n.type === "FRAME" && regex.test(n.name)
+  );
+  let maxIndex = 0;
+
+  maxIndex = frames.reduce((max, f) => {
+    const n = Number(f.name.replace(prefix, ""));
+    return Number.isNaN(n) ? max : Math.max(max, n);
+  }, 0);
+
+  const index = maxIndex + 1;
+
+  const kpFrame = template.clone();
+  kpFrame.name = `${prefix}${index}`;
+  template.parent.appendChild(kpFrame);
+  yieldToFigma();
+
+  const lastFrame = frames.reduce((last, f) => {
+    return !last || f.y > last.y ? f : last;
+  }, null);
+
+  kpFrame.x = template.x;
+  kpFrame.y = lastFrame
+    ? lastFrame.y + lastFrame.height + 40
+    : template.y + template.height + 40;
+
+  return { frame: kpFrame, index };
+}
+
+function putRectangle() {
+  const rect = figma.createRectangle();
+  rect.resize(1030, 2);
+  rect.fills = [{ type: "SOLID", color: { r: 198 / 255, g: 207 / 255, b: 213 / 255 } }];
+  return rect;
+}
+
+function deleteLast(frame) {
+  const frameChildren = frame.children;
+    if (frameChildren.length > 0) {
+      const last = frameChildren[frameChildren.length - 1];
+      yieldToFigma();
+      last.remove();
+    }
+}
+
+async function loadOldSlides() {
+  const pageRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$");
+  const pages = figma.root.children.filter(n => pageRegex.test(n.name));
+  let exportList = [];
+  for (const item of pages){
+    exportList.push({id: item.id, name: item.name})
+  }
+  return exportList;  
+}
+
+async function loadAllSlides() {
+  const page = figma.root.children.find(p => p.name === "Presentations");
+  if (!page) {      
+    figma.notify("Страница не найдена");
+      throw new Error("Page not found");
+  }
+
+  const presentations = [];
+
+  const basePresentation = page.children.find(p => p.name === "Презентация БАЗА");
+  let slides = basePresentation.children.map(slide => [slide.name, slide.id]);
+  presentations.push({section: basePresentation.name, slides});
+
+  page.children.forEach(section => {
+    if (section.name != "Презентация БАЗА")
+    {
+      slides = section.children.map(slide => [slide.name, slide.id]);
+      presentations.push({section: section.name, slides}); 
+    }
+    yieldToFigma();
+  });
+
+  return presentations;
+}
+
+async function updateTextInFrame(frame, textLayerName, newValue) {
+  /*const frame = figma.currentPage.findOne(n => n.type === "FRAME" && n.name === frameName);
+  if (!frame) {
+    return false;
+  }*/
+  const textNode = frame.findOne(n => n.type === "TEXT" && n.name === textLayerName);
+  if (!textNode) {
+    return false;
+  }
+  await figma.loadFontAsync(textNode.fontName);
+  textNode.characters = newValue;
+  return true;
+}
+
+
+async function createKPSlide(data, ifMaas) {
+  let result;
+  result = createNextKP(ifMaas);
+  
+  if (!result) {
+    figma.notify("Фрейм не найден");
+    throw new Error("Frame not found");
+  }
+  
+  const { frame, index } = result;
+  const frameKVProduct = frame.findOne(node => node.name === "KP_KV_products");
+  const frameKVService = frame.findOne(node => node.name === "KP_KV_services");
+  const frameAService = frame.findOne(node => node.name === "annual_services");
+  yieldToFigma();
+  let sumKP = 0;
+  let sumAnnual = 0;
+
+  if (!data) {
+    return null;
+  }
+  const variantsProduct = getVariantsProduct();
+  for (const element of data) {
+    let variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === element[0]);
+    if (!variant) {
+        variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === "Default");
+        figma.notify("Вариант не найден");
+      }
+    const instance = variant.createInstance();
+    switch (element[0].slice(0,3)) {
+        case 'US-': {
+            instance.setProperties({ 
+            //"Count#70:3": String(element[1]), 
+            //"Price#70:4": formatNumber(element[3]), 
+            "Value#70:5": formatNumber(element[1]*element[3])
+            });
+            sumKP+= element[1]*element[3];
+            frameKVService.appendChild(instance);
+            frameKVService.appendChild(putRectangle());
+            break;
+        }
+        case 'CC-': 
+        case 'CL-': {
+            instance.setProperties({ 
+            "Count#70:3": String(element[1]), 
+            "Price#70:4": formatNumber(element[3]), 
+            "Value#70:5": formatNumber(element[1]*element[3])
+            });
+            sumAnnual+=element[1]*element[3];
+            frameAService.appendChild(instance);
+            frameAService.appendChild(putRectangle());
+            break;
+        }
+        default: {
+            instance.setProperties({ 
+            "Count#70:3": String(element[1]), 
+            "Price#70:4": formatNumber(element[3]), 
+            "Value#70:5": formatNumber(element[1]*element[3])
+            });
+            sumKP+= element[1]*element[3];
+            frameKVProduct.appendChild(instance);
+            frameKVProduct.appendChild(putRectangle());
+        }
+    }
+    yieldToFigma();
+  }
+
+
+  deleteLast(frameKVService);
+  deleteLast(frameAService);
+  deleteLast(frameKVProduct);
+
+  if (frameKVService.children.length == 0) {
+    frameKVService.visible = false;
+  }
+
+  await updateTextInFrame(frame, "sumKV", formatNumber(sumKP));
+  await updateTextInFrame(frame, "sumAnnual", formatNumber(sumAnnual));
+
+  yieldToFigma();
+
+  return frame;
+}
+
+
+function findSlide(slideID) {
+  const page = figma.root.children.find(p => p.name == "Presentations");
+  let sld = undefined;
+  page.children.forEach(section => {
+    const tmp = section.children.find(slide => slide.id == String(slideID));
+    if (tmp) {sld = tmp;}
+  });
+  yieldToFigma();
+  return sld;
+}
+
+;// ./src/code.js
+
+
+
+
+
+async function init() {
+  figma.notify("Загрузка плагина, всё нормик :)");
+
+  const checkRes = await initResources();
+  yieldToFigma();
+  if (!checkRes.allFound) {
+    figma.notify("Нет ресурсов для КП");
+    return;
+  }
+
+  const presentations = await loadAllSlides();
+  if (!presentations) {
+    figma.notify("Нет ресурсов для КП");
+    return;
+  }
+
+  figma.showUI(__html__, { width: 320, height: 420 });
+
+  figma.ui.postMessage({
+    type:"slides",
+    data: JSON.stringify(presentations)
+  });
+}
+
+
+
+init();
+
+
+
+figma.ui.onmessage = async (msg) => {
+  switch (msg.type) {
+    case "my-json" :
+      {
+        const data = msg.data;
+
+        try {
+
+          let newPage = figma.createPage();
+          let curDate = new Date();
+          newPage.name = String(`${data['client']} ${String(curDate.getHours()).padStart(2, '0')}:${String(curDate.getMinutes()).padStart(2, '0')} ${String(curDate.getDate()).padStart(2, '0')}.${String(curDate.getMonth()+1).padStart(2, '0')}.${curDate.getFullYear()}`);
+
+          if (!data['slides']) {
+            figma.notify("Пустая презентация");
+            throw new Error("Empty presentation");
+          };
+
+          // слайды из презентации
+          let slideNum = 1;
+          let y = 0;
+          
+          for (const slideID of data['slides']) {
+           
+            const slideTarget = findSlide(slideID);
+            if (!slideTarget) {
+              figma.notify("Нет слайда");
+              throw new Error(`No slide for ${slideID}`);
+            }
+            const slideClone = slideTarget.clone();
+            slideClone.name = `${slideNum}`;
+            newPage.appendChild(slideClone);
+            slideClone.x = 0;
+            slideClone.y = y;
+            y += slideClone.height + 60;
+            slideNum+=1;
+            
+            yieldToFigma();
+          }
+
+          // слайд про МааС
+
+          if (data['ifMaas']) {
+            const MaaSclone = getMaaSpage().clone();
+            newPage.appendChild(MaaSclone);
+            MaaSclone.name = `${slideNum}`;
+            MaaSclone.x = 0;
+            MaaSclone.y = y;
+
+            y += MaaSclone.height + 60;
+            slideNum+=1;
+
+            yieldToFigma();
+          }
+
+          // слайд с кп
+          let KPframe = await createKPSlide(data['products'], data['ifMaas']);
+          const KPclone = KPframe.clone();
+          newPage.appendChild(KPclone);
+          KPclone.name = `${slideNum}`;
+          KPclone.x = 0;
+          KPclone.y = y;
+
+          y += KPclone.height + 60;
+          slideNum+=1;
+
+          yieldToFigma();
+
+
+          // слайды с описанием оборудования
+          const productSlides = getProductSlides();
+          for (const element of (data['products'] || [])) {
+            let productSlide = productSlides.findOne(node => node.name === element[0]);
+            if (productSlide) {
+             const productSlideClone = productSlide.clone();
+              newPage.appendChild(productSlideClone);
+              productSlideClone.name = `${slideNum}`;
+              productSlideClone.x = 0;
+              productSlideClone.y = y;
+              y += productSlideClone.height + 60;
+              slideNum+=1;      
+            }
+            yieldToFigma();
+          }
+
+          // слайд с контактами
+          const contactSlides = getContactSlides();
+          const contactSlide = contactSlides.children.find(node => node.name === data['creator']);
+          if (!contactSlide) {
+            throw new Error("No contact slide");
+          }
+          const contactClone = contactSlide.clone();
+          newPage.appendChild(contactClone);
+          contactClone.name = `${slideNum}`;
+          contactClone.x = 0;
+          contactClone.y = y;
+
+          yieldToFigma();
+
+          figma.ui.postMessage({
+            type: "presentationCreated",
+            data: newPage.name
+          });
+          
+          await figma.setCurrentPageAsync(newPage);
+
+
+        } catch (err) {
+          console.error(err);
+          figma.ui.postMessage({
+            type: "showError",
+            err
+          });
+        }
+        break;
+      }
+    case "deleteKP" : {
+      const page = figma.root.children.find(p => p.name === "Assets");
+      const kpFrames = page.findAll(
+        node =>
+          node.type === "FRAME" &&
+          /^(MaaSKP|KP)\d+$/.test(node.name)
+      );
+      for (const frame of kpFrames) {
+        frame.remove()
+        yieldToFigma();
+      }
+      
+      figma.notify("Старые КП удалены");
+      break;
+    }
+    case "deleteOld" : {
+      const newRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$");;
+      const pagesToRemove = figma.root.children.filter(page => newRegex.test(page.name));
+      if (pagesToRemove.length === 0) {
+        //figma.notify('Страницы с названием "Презентация" не найдены');
+        return;
+      }
+      const currentPage = figma.currentPage;
+      if (pagesToRemove.includes(currentPage)) {
+        const anotherPage = figma.root.children.find(
+          page => !pagesToRemove.includes(page)
+        );
+        if (!anotherPage) {
+          figma.notify("Нельзя удалить все страницы документа");
+          return;
+        }
+        await figma.setCurrentPageAsync(anotherPage);
+        yieldToFigma();
+      }
+      for (let page of pagesToRemove) {
+        page.remove();
+        yieldToFigma();
+      }
+      figma.notify("Старые презентации удалены");
+      break;
+    }
+    case "getImages" : {
+      const pagename = msg.data;
+      const page = figma.root.children.find(n => n.name === pagename);
+      if (!page) {
+        figma.ui.postMessage({
+          type:"showError",
+          data: "Нет страницы с презентацией"
+        });
+        return;        
+      }
+      let images = [];
+      for (const frame of page.children) {
+        if (frame.type === "FRAME") {
+          const png = await frame.exportAsync({ format: "PNG", scale: 1 });
+          images.push({ name: frame.name, bytes: png });
+        }
+        yieldToFigma();
+      }
+
+      figma.ui.postMessage({ type: "imagesReady", data: {images:images, name:pagename } });
+      break;
+    }
+    case "getOldPresentations": {
+      const oldSlides = await loadOldSlides();
+      figma.ui.postMessage({ type: "showOldPresentations", data: JSON.stringify(oldSlides) });
+
+      break;
+    }
+    case "thatsAll": {
+      figma.closePlugin();
+      break;
+    }
+    default: {
+      figma.notify("Ничего не произошло");
+    }
+
+  }
+};
+
+/******/ })()
+;

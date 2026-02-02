@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<head>
+  <style type="text/css">
+  :root {
+    --figma-font: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --text-primary: #1e1e1e;
+    --text-secondary: #6e6e6e;
+
+    --bg-default: #ffffff;
+    --bg-hover: #f5f5f5;
+    --bg-active: #eaeaea;
+
+    --border-default: #d9d9d9;
+    --border-focus: #0d99ff;
+
+    --btn-primary: #0d99ff;
+    --btn-primary-hover: #0b87e0;
+    --btn-text: #ffffff;
+  }
+  body {
+    margin: 0;
+    padding: 12px;
+    font-family: var(--figma-font);
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--bg-default);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  p {
+    margin: 0 0 8px;
+    font-size: 12px;
+  }
+  input,
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 6px 8px;
+    font-family: var(--figma-font);
+    font-size: 12px;
+    color: var(--text-primary);
+
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    background: #fff;
+
+    outline: none;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-secondary);
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--border-focus);
+  }
+
+
+  select {
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #6e6e6e 50%),
+      linear-gradient(135deg, #6e6e6e 50%, transparent 50%);
+    background-position:
+      calc(100% - 14px) 50%,
+      calc(100% - 9px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+
+  button {
+    padding: 6px 12px;
+    font-family: var(--figma-font);
+    font-size: 12px;
+    font-weight: 500;
+
+    border-radius: 6px;
+    border: none;
+
+    background: var(--btn-primary);
+    color: var(--btn-text);
+    cursor: pointer;
+    margin-bottom: 5px;
+  }
+
+  button:hover {
+    background: var(--btn-primary-hover);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .row > * {
+    flex: 1;
+  }
+
+  .slidesList {
+    display: flex;
+    flex-wrap: wrap; /* перенос строк */
+    gap: 4px;       /* расстояние между слайдами */
+  }
+  .slideRow {
+    display: flex;
+    flex: 0 0 calc(50% - 6px); /* ширина половина контейнера минус половина gap */
+    box-sizing: border-box;
+    margin-bottom: 4px;        /* вертикальный отступ */
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #fff; /* цвет фона ячейки */
+    cursor: pointer;
+  }
+
+  .slideRow:hover {
+    background: #f5f5f5; /* подсветка при наведении */
+  }
+
+  .slideRow input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+  }
+
+  .slideLabel {
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    color: #1e1e1e;
+  }
+
+  .slidePreview {
+    /* width: 60px; */
+    height: 40px;
+    object-fit: cover;
+    margin-left: auto; /* сдвигает превью вправо */
+    border-radius: 4px;
+  }
+
+  .spinner {
+      border: 4px solid #f3f3f3; /* светлый фон */
+      border-top: 4px solid #4a90e2; /* цвет вращающейся части */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  #status {
+    margin-top: 5px;
+  }
+  
+
+  </style>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<html>
+  <body>
+
+    <div class="screen" id="first">
+      <label>
+      Кто создаёт КП:
+      <select name="worker" id="workerSelect">
+        <option value="general">-- --</option>
+        <option value="tatyana">Гаврилова Татьяна</option>
+        <option value="kristina">Алексеева Кристина</option>
+        <option value="timofey">Рубцов Тимофей</option>
+        <option value="ruslan">Узунов Руслан</option>
+      </select>
+      </label>
+      <hr>
+      <label>
+        Клиент
+        <input type="text" name="client" id="client">
+      </label>
+      <hr>
+      <label>
+        Базовая презентация:
+        <select name="presentationSelect" id="presentationSelect">
+          <!--<option value="general">-- --</option> -->
+        </select>
+      </label>
+      <hr>
+      <label>
+        MaaS:
+        <input type="checkbox" name="ifMaaS" id="ifMaaS">
+      </label>
+      <hr>
+      <label>
+        Товары из калькулятора:
+        <textarea id="parserText" style="resize: vertical;"></textarea>
+      </label>
+      <button id="parserButton">Отправить</button>
+      <hr>
+      <button id="otherbuttons">Опции</button>
+      </div>
+    <div class="screen" id="second">
+      <div style="margin:auto;">
+        <div class="spinner" id="spinner"></div>
+        <div id="status">Ожидание...</div>
+      </div>
+    </div>
+    <div class="screen" id="third">
+      <p>Презентация создана успешно. Не закрывайте плагин, если будете редактировать презентацию.</p>
+      <p>Название презентации: <span id="presentationName"></span> </p>
+      <button id="savePDF">Сохранить презентацию в PDF</button>
+
+
+    </div>
+    <div class="screen" id="forth">
+      <p>Возникла ошибка</p>
+      <p id="errorMessage"></p>
+    </div>
+    <div class="screen" id="fifth">
+      <button id="deleteKP">Очистить КП</button>
+      <br/>
+      <button id="deleteOld">Очистить презентации</button>
+      <hr>
+      <label>
+        Сохранить предыдущую презентацию:
+        <select id="oldPresentations">
+        </select>
+      </label>
+      <button id="saveOtherPDF">Сохранить</button>
+
+    </div>
+
+    <script>
+    
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(div => div.style.display = 'none');
+        document.getElementById(screenId).style.display = 'block';
+    }
+
+    async function createPdf(images, name) {
+    
+    const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "px",
+        format: [1920, 1080]
+    });
+
+    for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const blob = new Blob([img.bytes], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+
+        const imgEl = await loadImage(url);
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = (imgEl.height * pageWidth) / imgEl.width;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgEl, "PNG", 0, 0, pageWidth, pageHeight);
+
+        URL.revokeObjectURL(url);
+    }
+
+    pdf.save(`${name}.pdf`);
+}
+
+    function loadImage(src) {
+        return new Promise((res, rej) => {
+            const img = new Image();
+            img.onload = () => res(img);
+            img.onerror = rej;
+            img.src = src;
+        });
+    }
+
+    async function somefunction() {
+      let raw = document.getElementById("parserText").value;
+      let text = undefined;
+      showScreen("second");
+
+      try {
+          const selectedPresentation = presentations[Number(document.getElementById("presentationSelect").value)];
+          const client = document.getElementById("client").value;
+          if (!client) {
+              throw new Error("Укажите клиента");
+          }
+
+          let finalVersion = new Map([...selectedPresentation]);
+          (presentations[0]).forEach((value, key) => {
+              if (!finalVersion.has(key)) {
+                  finalVersion.set(key, value);
+              }
+          });
+          finalVersion = new Map([...finalVersion.entries()].sort(([keyA], [keyB]) => keyA - keyB));
+
+          const ifMaas = document.getElementById('ifMaaS').checked;
+
+          const data = {
+              client: client,
+              products: JSON.parse(raw),
+              slides: [...finalVersion.values()],
+              ifMaas: ifMaas,
+              creator: document.getElementById('workerSelect').value
+          };
+
+          parent.postMessage(
+              {
+                  pluginMessage: {
+                      type: "my-json",
+                      data
+                  }
+              },
+              "*"
+          );
+      } catch (error) {
+          document.getElementById("errorMessage").innerHTML = error;
+          showScreen("forth");
+      }
+  }
+
+
+    window.onmessage = async (event) => {
+        const msg = event.data.pluginMessage;
+        if (!msg) return;
+
+        switch (msg.type) {
+            case "slides": {
+                const data = JSON.parse(msg.data);
+                //console.log(data);
+                const names = data.map(item => item.section);
+                data.forEach(presentation => {
+                    let tmp = new Map(presentation.slides.map(([key, value]) => [Number(key), value]));
+                    presentations.push(tmp);
+                });
+                let select = document.getElementById("presentationSelect");
+                let i = 0;
+                names.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = name;
+                    select.appendChild(option);
+                    i += 1;
+                });
+                showScreen("first");
+                break;
+            }
+            case "showOldPresentations": {
+              const oldSelect = document.getElementById("oldPresentations");
+              const data = JSON.parse(msg.data);
+              data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                oldSelect.appendChild(option);
+              });
+              showScreen("fifth");
+
+              break;
+            }
+            case "presentationCreated": {
+                document.getElementById("presentationName").innerHTML = msg.data;
+                showScreen("third");
+                break;
+            }
+            case "showError": {
+                showScreen("forth");
+                break;
+            }
+            case "imagesReady": {
+                await createPdf(msg.data, document.getElementById("presentationName"));
+                parent.postMessage(
+                    {
+                        pluginMessage: {
+                            type: "thatsAll",
+                        }
+                    },
+                    "*"
+                );
+                break;
+            }
+            default: {
+
+            }
+        }
+    };
+
+
+    document.getElementById('parserButton').addEventListener("click", somefunction );
+
+    document.getElementById('otherbuttons').addEventListener("click", () => {
+      showScreen("second");
+      parent.postMessage({
+        pluginMessage: {type: "getOldPresentations"}
+      },"*");
+    });
+
+    document.getElementById('saveOtherPDF').addEventListener("click", () => {
+      showScreen("second");
+      curPresentation = document.getElementById('oldPresentations').value;
+        parent.postMessage(
+            {
+                pluginMessage: {
+                    type: "getImages",
+                    data: document.getElementById('oldPresentations').value
+                }
+            },
+            "*"
+        );
+    });
+
+    document.getElementById('savePDF').addEventListener("click", () => {
+        showScreen("second");
+        curPresentation = document.getElementById('presentationName').innerHTML;
+        parent.postMessage(
+            {
+                pluginMessage: {
+                    type: "getImages",
+                    data: curPresentation
+                }
+            },
+            "*"
+        );
+    });
+    let curPresentation = null;
+    let presentations = [];
+    showScreen("second");
+    </script>
+  </body>
+</html>

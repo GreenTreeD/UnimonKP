@@ -114,7 +114,7 @@ async function updateTextInFrame(frame, textLayerName, newValue) {
 
 export async function createKPSlide(data, ifMaas) {
   let result;
-  result = createNextKP(ifMaas);
+  result = createNextKP(0);
   
   if (!result) {
     figma.notify("Фрейм не найден");
@@ -205,4 +205,44 @@ export function findSlide(slideID) {
   });
   yieldToFigma();
   return sld;
+}
+
+
+export async function createRentalSlide(info) {
+    const curPage = figma.root.children.find(p => p.name === "Assets");
+    if (!curPage) return null;
+
+    const template = curPage.findOne(n => n.type === "FRAME" && n.name === "rental");
+    if (!template) return null;
+    const clone = template.clone();
+
+    yieldToFigma();
+
+
+    await updateTextInFrame(clone, "ConfigSum", formatNumber(info['ConfigSum']));
+    await updateTextInFrame(clone, "RentSum", formatNumber(info['RentSum']));
+    await updateTextInFrame(clone, "ServiceSum", formatNumber(info['ServiceSum']));
+
+    yieldToFigma();
+
+    const table = clone.findOne(n => n.name === "table");
+    console.log("table", table.children);
+    const datatable = info['table'];
+
+    let i = 0;
+    for (const row of table.children) {  
+      await updateTextInFrame(row, "RentSum", formatNumber(0));
+      /*await updateTextInFrame(row, "RentSum", formatNumber(datatable[i].RentSum));
+      await updateTextInFrame(row, "GSMSum", formatNumber(datatable[i]['GSMSum']));
+      await updateTextInFrame(row, "GuaranteeSum", formatNumber(datatable[i]['GuaranteeSum']));
+      await updateTextInFrame(row, "DispatcherSum", formatNumber(datatable[i]['DispatcherSum']));
+      await updateTextInFrame(row, "VisitSum", formatNumber(datatable[i]['VisitSum']));
+      await updateTextInFrame(row, "BatterySum", formatNumber(datatable[i]['BatterySum']));
+      await updateTextInFrame(row, "VerifSum", formatNumber(datatable[i]['VerifSum']));*/
+      i++;
+      yieldToFigma();
+    }
+    
+    return clone;
+  
 }

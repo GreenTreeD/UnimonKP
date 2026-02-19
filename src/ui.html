@@ -207,13 +207,62 @@
       </label>
       <hr>
       <label>
-        MaaS:
-        <input type="checkbox" name="ifMaaS" id="ifMaaS">
-      </label>
-      <hr>
-      <label>
         Товары из калькулятора:
-        <textarea id="parserText" style="resize: vertical;"></textarea>
+        <textarea id="parserText" style="resize: vertical;">{
+    "maas": {
+        "ConfigSum": 17000,
+        "RentSum": 830,
+        "ServiceSum": 4100,
+        "table": [{
+            "RentSum": 9960,
+            "GSMSum": 8160,
+            "GuaranteeSum": 5400,
+            "DispatcherSum": 6480,
+            "VisitSum": 14400,
+            "BatterySum": 0,
+            "VerifSum": 0
+        }, {
+            "RentSum": 9960,
+            "GSMSum": 8160,
+            "GuaranteeSum": 5400,
+            "DispatcherSum": 6480,
+            "VisitSum": 14400,
+            "BatterySum": 1800,
+            "VerifSum": 0
+        }, {
+            "RentSum": 9960,
+            "GSMSum": 8160,
+            "GuaranteeSum": 5400,
+            "DispatcherSum": 6480,
+            "VisitSum": 14400,
+            "BatterySum": 1800,
+            "VerifSum": 0
+        }, {
+            "RentSum": 9960,
+            "GSMSum": 8160,
+            "GuaranteeSum": 5400,
+            "DispatcherSum": 6480,
+            "VisitSum": 14400,
+            "BatterySum": 1800,
+            "VerifSum": 0
+        }]
+    },
+    "operationalCosts": {
+        "GSMSumMonthly": 680,
+        "GuaranteeSumMonthly": 450,
+        "DispatcherSumMonthly": 540,
+        "VisitSumMonthly": 1200,
+        "BatterySumMonthly": 1800,
+        "VerifSumMonthly": 0
+    },
+    "products": [
+        ["Radio", 1, "", 29900],
+        ["US-Setup", 1, "", 9000],
+        ["US-Install", 1, "", 8000],
+        ["US-Maintenance", 1, "", 7000],
+        ["CL-Promo", 1, "", 0]
+    ]
+}</textarea>
       </label>
       <button id="parserButton">Отправить</button>
       <hr>

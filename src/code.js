@@ -1,6 +1,6 @@
 
 import { initResources, getContactSlides, getMaaSpage, getProductSlides, yieldToFigma } from "./utils.js";
-import { findSlide, createKPSlide, loadAllSlides, loadOldSlides} from "./slides.js";
+import { findSlide, createKPSlide,createRentalSlide, loadAllSlides, loadOldSlides} from "./slides.js";
 
 
 async function init() {
@@ -72,23 +72,34 @@ figma.ui.onmessage = async (msg) => {
             yieldToFigma();
           }
 
+          // слайд rental
+          console.log(data['MaaSinfo']);
+          const rentalClone = await createRentalSlide(data['MaaSinfo']);
+          newPage.appendChild(rentalClone);
+          rentalClone.name = `${slideNum}`;
+          rentalClone.x = 0;
+          rentalClone.y = y;
+
+          y += rentalClone.height + 60;
+          slideNum+=1;
+
+          yieldToFigma();
+
           // слайд про МааС
+          const MaaSclone = getMaaSpage().clone();
+          newPage.appendChild(MaaSclone);
+          MaaSclone.name = `${slideNum}`;
+          MaaSclone.x = 0;
+          MaaSclone.y = y;
 
-          if (data['ifMaas']) {
-            const MaaSclone = getMaaSpage().clone();
-            newPage.appendChild(MaaSclone);
-            MaaSclone.name = `${slideNum}`;
-            MaaSclone.x = 0;
-            MaaSclone.y = y;
+          y += MaaSclone.height + 60;
+          slideNum+=1;
 
-            y += MaaSclone.height + 60;
-            slideNum+=1;
-
-            yieldToFigma();
-          }
+          yieldToFigma();
+          
 
           // слайд с кп
-          let KPframe = await createKPSlide(data['products'], data['ifMaas']);
+          /* let KPframe = await createKPSlide(data['products'], data['ifMaas']);
           const KPclone = KPframe.clone();
           newPage.appendChild(KPclone);
           KPclone.name = `${slideNum}`;
@@ -96,7 +107,7 @@ figma.ui.onmessage = async (msg) => {
           KPclone.y = y;
 
           y += KPclone.height + 60;
-          slideNum+=1;
+          slideNum+=1; */
 
           yieldToFigma();
 

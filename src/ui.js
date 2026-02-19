@@ -47,6 +47,7 @@ async function somefunction() {
     showScreen("second");
 
     try {
+        console.log(JSON.parse(raw).products);
         const selectedPresentation = presentations[Number(document.getElementById("presentationSelect").value)];
         const client = document.getElementById("client").value;
         if (!client) {
@@ -60,14 +61,13 @@ async function somefunction() {
             }
         });
         finalVersion = new Map([...finalVersion.entries()].sort(([keyA], [keyB]) => keyA - keyB));
-
-        const ifMaas = document.getElementById('ifMaaS').checked;
+        const dataJSON = JSON.parse(raw);
 
         const data = {
             client: client,
-            products: JSON.parse(raw),
+            products: dataJSON.products,
             slides: [...finalVersion.values()],
-            ifMaas: ifMaas,
+            MaaSinfo: dataJSON.maas,
             creator: document.getElementById('workerSelect').value
         };
 

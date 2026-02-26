@@ -68,6 +68,7 @@ async function somefunction() {
             products: dataJSON.products,
             slides: [...finalVersion.values()],
             MaaSinfo: dataJSON.maas,
+            operationalCosts: dataJSON.operationalCosts,
             creator: document.getElementById('workerSelect').value
         };
 

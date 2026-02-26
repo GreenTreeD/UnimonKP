@@ -14,7 +14,7 @@ export async function initResources() {
     variantsProduct: figma.root.findOne(n => n.type === "COMPONENT_SET" && n.name === "Product"), // компонент со строками для рассчёта
     contactSlides: assetsPage.findOne(n => n.type === "SECTION" && n.name === "ContactSlides"), // контакты
     productSlides: assetsPage.findOne(n => n.type === "SECTION" && n.name === "productSlides"), // слайды с подробным описанием продуктов
-    MaaSpage: assetsPage.findOne(n => n.type === "FRAME" && n.name === "MaaSdesc") // слайд для МааS
+    MaaSpage: assetsPage.findOne(n => n.type === "FRAME" && n.name === "MaaSdesc"), // слайд для МааS
   };
   yieldToFigma();
   
@@ -43,7 +43,6 @@ export function getVariantsProduct() {
   if (state == null) return null;
   return state.variantsProduct;
 }
-
 
 export function formatNumber(num) {
   return num

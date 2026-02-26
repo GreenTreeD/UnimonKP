@@ -2,18 +2,18 @@
 import { yieldToFigma, formatNumber, getVariantsProduct } from "./utils.js";
 
 
-function createNextKP(ifMaas) {
+async function createNextKP() {
   const curPage = figma.root.children.find(p => p.name === "Assets");
   if (!curPage) return null;
 
-  const templateName = ifMaas ? "MaaSKP_example" : "KP_example";
-  const prefix = ifMaas ? "MaaSKP" : "KP";
+  const templateName = "KP_example";
+  const prefix = "KP";
   const regex = new RegExp(`^${prefix}\\d+$`);
 
   const template = curPage.children.find(
     n => n.type === "FRAME" && n.name === templateName
   );
-  yieldToFigma();
+  await yieldToFigma();
   
   if (!template) return null;
 
@@ -32,7 +32,7 @@ function createNextKP(ifMaas) {
   const kpFrame = template.clone();
   kpFrame.name = `${prefix}${index}`;
   template.parent.appendChild(kpFrame);
-  yieldToFigma();
+  await yieldToFigma();
 
   const lastFrame = frames.reduce((last, f) => {
     return !last || f.y > last.y ? f : last;
@@ -53,11 +53,11 @@ function putRectangle() {
   return rect;
 }
 
-function deleteLast(frame) {
+async function deleteLast(frame) {
   const frameChildren = frame.children;
     if (frameChildren.length > 0) {
       const last = frameChildren[frameChildren.length - 1];
-      yieldToFigma();
+      await yieldToFigma();
       last.remove();
     }
 }
@@ -85,36 +85,38 @@ export async function loadAllSlides() {
   let slides = basePresentation.children.map(slide => [slide.name, slide.id]);
   presentations.push({section: basePresentation.name, slides});
 
-  page.children.forEach(section => {
+  for (const section of page.children) {
     if (section.name != "Презентация БАЗА")
     {
       slides = section.children.map(slide => [slide.name, slide.id]);
       presentations.push({section: section.name, slides}); 
     }
-    yieldToFigma();
-  });
+    await yieldToFigma();
+  }
 
   return presentations;
 }
 
 async function updateTextInFrame(frame, textLayerName, newValue) {
-  /*const frame = figma.currentPage.findOne(n => n.type === "FRAME" && n.name === frameName);
   if (!frame) {
     return false;
-  }*/
-  const textNode = frame.findOne(n => n.type === "TEXT" && n.name === textLayerName);
-  if (!textNode) {
+  }
+  const textNodes = frame.findAll(n => n.type === "TEXT" && n.name === textLayerName);
+  if (textNodes.length === 0) {
+    console.log('textNodes.length === 0', textLayerName);
     return false;
   }
-  await figma.loadFontAsync(textNode.fontName);
-  textNode.characters = newValue;
+  for (const item of textNodes) {
+    await figma.loadFontAsync(item.fontName);
+    await yieldToFigma();
+    item.characters = newValue;
+  }
   return true;
 }
 
 
-export async function createKPSlide(data, ifMaas) {
-  let result;
-  result = createNextKP(0);
+export async function createKPSlide(data) {
+  let result = await createNextKP();
   
   if (!result) {
     figma.notify("Фрейм не найден");
@@ -125,7 +127,8 @@ export async function createKPSlide(data, ifMaas) {
   const frameKVProduct = frame.findOne(node => node.name === "KP_KV_products");
   const frameKVService = frame.findOne(node => node.name === "KP_KV_services");
   const frameAService = frame.findOne(node => node.name === "annual_services");
-  yieldToFigma();
+  
+  await yieldToFigma();
   let sumKP = 0;
   let sumAnnual = 0;
 
@@ -135,6 +138,7 @@ export async function createKPSlide(data, ifMaas) {
   const variantsProduct = getVariantsProduct();
   for (const element of data) {
     let variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === element[0]);
+ 
     if (!variant) {
         variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === "Default");
         figma.notify("Вариант не найден");
@@ -175,7 +179,7 @@ export async function createKPSlide(data, ifMaas) {
             frameKVProduct.appendChild(putRectangle());
         }
     }
-    yieldToFigma();
+    await yieldToFigma();
   }
 
 
@@ -190,20 +194,21 @@ export async function createKPSlide(data, ifMaas) {
   await updateTextInFrame(frame, "sumKV", formatNumber(sumKP));
   await updateTextInFrame(frame, "sumAnnual", formatNumber(sumAnnual));
 
-  yieldToFigma();
+  await yieldToFigma();
 
   return frame;
 }
 
 
-export function findSlide(slideID) {
+export async function findSlide(slideID) {
   const page = figma.root.children.find(p => p.name == "Presentations");
   let sld = undefined;
-  page.children.forEach(section => {
+  
+  for (const section of page.children) {
     const tmp = section.children.find(slide => slide.id == String(slideID));
     if (tmp) {sld = tmp;}
-  });
-  yieldToFigma();
+  }
+  await yieldToFigma();
   return sld;
 }
 
@@ -215,34 +220,76 @@ export async function createRentalSlide(info) {
     const template = curPage.findOne(n => n.type === "FRAME" && n.name === "rental");
     if (!template) return null;
     const clone = template.clone();
+    clone.name = "RENTAL_CLONE";
 
-    yieldToFigma();
+    await yieldToFigma();
 
 
     await updateTextInFrame(clone, "ConfigSum", formatNumber(info['ConfigSum']));
     await updateTextInFrame(clone, "RentSum", formatNumber(info['RentSum']));
     await updateTextInFrame(clone, "ServiceSum", formatNumber(info['ServiceSum']));
 
-    yieldToFigma();
+    await yieldToFigma();
 
     const table = clone.findOne(n => n.name === "table");
     console.log("table", table.children);
     const datatable = info['table'];
+    console.log("datatable",datatable);
 
+    let equipmentSum = 0;
     let i = 0;
-    for (const row of table.children) {  
-      await updateTextInFrame(row, "RentSum", formatNumber(0));
-      /*await updateTextInFrame(row, "RentSum", formatNumber(datatable[i].RentSum));
-      await updateTextInFrame(row, "GSMSum", formatNumber(datatable[i]['GSMSum']));
-      await updateTextInFrame(row, "GuaranteeSum", formatNumber(datatable[i]['GuaranteeSum']));
-      await updateTextInFrame(row, "DispatcherSum", formatNumber(datatable[i]['DispatcherSum']));
-      await updateTextInFrame(row, "VisitSum", formatNumber(datatable[i]['VisitSum']));
-      await updateTextInFrame(row, "BatterySum", formatNumber(datatable[i]['BatterySum']));
-      await updateTextInFrame(row, "VerifSum", formatNumber(datatable[i]['VerifSum']));*/
-      i++;
-      yieldToFigma();
+    for (const row of table.children) {
+
+      if (row.name.startsWith("row")) {
+        await updateTextInFrame(row, "CloudSum", formatNumber(datatable[i]['CloudSum']));
+        equipmentSum+=datatable[i]['CloudSum'];
+        await updateTextInFrame(row, "GSMSum", formatNumber(datatable[i]['GSMSum']));
+        equipmentSum+=datatable[i]['GSMSum'];
+        await updateTextInFrame(row, "GuaranteeSum", formatNumber(datatable[i]['GuaranteeSum']));
+        equipmentSum+=datatable[i]['GuaranteeSum'];
+        await updateTextInFrame(row, "DispatcherSum", formatNumber(datatable[i]['DispatcherSum']));
+        equipmentSum+=datatable[i]['DispatcherSum'];
+        await updateTextInFrame(row, "VisitSum", formatNumber(datatable[i]['VisitSum']));
+        equipmentSum+=datatable[i]['VisitSum'];
+        await updateTextInFrame(row, "BatterySum", formatNumber(datatable[i]['BatterySum']));
+        equipmentSum+=datatable[i]['BatterySum'];
+        await updateTextInFrame(row, "VerifSum", formatNumber(datatable[i]['VerifSum']));
+        equipmentSum+=datatable[i]['VerifSum'];
+        i++;
+      }
+      await yieldToFigma();
     }
+    await updateTextInFrame(clone,"MaaSsum", formatNumber(equipmentSum));
+    await updateTextInFrame(clone,"sumPerMonth", formatNumber(Math.ceil(equipmentSum/4/12)));
     
     return clone;
   
+}
+
+export async function createOperationalCostsSlide(info) {
+  const curPage = figma.root.children.find(p => p.name === "Assets");
+  if (!curPage) return null;
+
+  const template = curPage.findOne(n => n.type === "FRAME" && n.name === "operating_costs");
+  if (!template) return null;
+  const clone = template.clone();
+  clone.name = "OPERATIONAL_CLONE";
+  let opCostMonthly = 0;
+
+  await updateTextInFrame(clone, "GSMSumMonthly", formatNumber(info['GSMSumMonthly']));
+  opCostMonthly+=info['GSMSumMonthly'];
+  await updateTextInFrame(clone, "GuaranteeSumMonthly", formatNumber(info['GuaranteeSumMonthly']));
+  opCostMonthly+=info['GuaranteeSumMonthly'];
+  await updateTextInFrame(clone, "DispatcherSumMonthly", formatNumber(info['DispatcherSumMonthly']));
+  opCostMonthly+=info['DispatcherSumMonthly'];
+  await updateTextInFrame(clone, "VisitSumMonthly", formatNumber(info['VisitSumMonthly']));
+  opCostMonthly+=info['VisitSumMonthly'];
+  await updateTextInFrame(clone, "BatterySum", formatNumber(info['BatterySum']));
+  opCostMonthly+=info['BatterySum'];
+  await updateTextInFrame(clone, "VerifSum", formatNumber(info['VerifSum']));
+  opCostMonthly+=info['VerifSum'];
+  await updateTextInFrame(clone, "opCostMonthly", formatNumber(info['opCostMonthly']));
+  await yieldToFigma();
+
+  return clone;
 }

@@ -73,67 +73,6 @@ figma.ui.onmessage = async (msg) => {
           }
           console.log("Копирование базовой презентации2");
 
-          console.log("слайд про МааС1");
-          // слайд про МааС
-          const MaaSclone = getMaaSpage().clone();
-          newPage.appendChild(MaaSclone);
-          MaaSclone.name = `${slideNum}`;
-          MaaSclone.x = 0;
-          MaaSclone.y = y;
-
-          y += MaaSclone.height + 60;
-          slideNum+=1;
-          console.log("слайд про МааС2");
-
-          yieldToFigma();
-
-          console.log("слайд про operationalCosts1");
-          // слайд про МааС
-
-          console.log(data["operationalCosts"]);
-          const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
-          newPage.appendChild(operationalCostsclone);
-          operationalCostsclone.name = `${slideNum}`;
-          operationalCostsclone.x = 0;
-          operationalCostsclone.y = y;
-
-          y += operationalCostsclone.height + 60;
-          slideNum+=1;
-          console.log("слайд про operationalCosts2");
-
-          yieldToFigma();
-
-
-          // слайд rental
-          console.log("слайд rental1");
-          const rentalClone = await createRentalSlide(data['MaaSinfo']);
-          newPage.appendChild(rentalClone);
-          rentalClone.name = `${slideNum}`;
-          rentalClone.x = 0;
-          rentalClone.y = y;
-
-          y += rentalClone.height + 60;
-          slideNum+=1;
-          console.log("слайд rental2");
-
-          yieldToFigma();
-          
-          
-
-          // слайд с кп
-          let KPframe = await createKPSlide(data['products']);
-          const KPclone = KPframe.clone();
-          newPage.appendChild(KPclone);
-          KPclone.name = `${slideNum}`;
-          KPclone.x = 0;
-          KPclone.y = y;
-
-          y += KPclone.height + 60;
-          slideNum+=1;
-
-          yieldToFigma();
-
-
           // слайды с описанием оборудования
           const productSlides = getProductSlides();
           for (const element of (data['products'] || [])) {
@@ -149,6 +88,62 @@ figma.ui.onmessage = async (msg) => {
             }
             yieldToFigma();
           }
+
+          // слайд с кп
+          let KPframe = await createKPSlide(data['products']);
+          const KPclone = KPframe.clone();
+          newPage.appendChild(KPclone);
+          KPclone.name = `${slideNum}`;
+          KPclone.x = 0;
+          KPclone.y = y;
+
+          y += KPclone.height + 60;
+          slideNum+=1;
+          yieldToFigma();
+
+          // слайд про эксплуатационные расходы
+          console.log(data["operationalCosts"]);
+          const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
+          newPage.appendChild(operationalCostsclone);
+          operationalCostsclone.name = `${slideNum}`;
+          operationalCostsclone.x = 0;
+          operationalCostsclone.y = y;
+
+          y += operationalCostsclone.height + 60;
+          slideNum+=1;
+          console.log("слайд про operationalCosts2");
+          yieldToFigma();
+
+          // слайд rental
+          console.log("слайд rental1");
+          const rentalClone = await createRentalSlide(data['MaaSinfo']);
+          newPage.appendChild(rentalClone);
+          rentalClone.name = `${slideNum}`;
+          rentalClone.x = 0;
+          rentalClone.y = y;
+
+          y += rentalClone.height + 60;
+          slideNum+=1;
+          console.log("слайд rental2");
+
+          yieldToFigma();
+
+          console.log("слайд про МааС1");
+          // слайд про МааС
+          const MaaSclone = getMaaSpage().clone();
+          newPage.appendChild(MaaSclone);
+          MaaSclone.name = `${slideNum}`;
+          MaaSclone.x = 0;
+          MaaSclone.y = y;
+
+          y += MaaSclone.height + 60;
+          slideNum+=1;
+          console.log("слайд про МааС2");
+
+          yieldToFigma();
+
+          console.log("слайд про operationalCosts1");
+     
 
           // слайд с контактами
           const contactSlides = getContactSlides();

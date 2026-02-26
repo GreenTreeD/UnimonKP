@@ -224,10 +224,13 @@ export async function createRentalSlide(info) {
 
     await yieldToFigma();
 
-
+    console.log("a");
     await updateTextInFrame(clone, "ConfigSum", formatNumber(info['ConfigSum']));
+    console.log("b");
     await updateTextInFrame(clone, "RentSum", formatNumber(info['RentSum']));
+    console.log("c");
     await updateTextInFrame(clone, "ServiceSum", formatNumber(info['ServiceSum']));
+    console.log("d");
 
     await yieldToFigma();
 
@@ -237,30 +240,31 @@ export async function createRentalSlide(info) {
     console.log("datatable",datatable);
 
     let equipmentSum = 0;
-    let i = 0;
     for (const row of table.children) {
 
       if (row.name.startsWith("row")) {
-        await updateTextInFrame(row, "CloudSum", formatNumber(datatable[i]['CloudSum']));
-        equipmentSum+=datatable[i]['CloudSum'];
-        await updateTextInFrame(row, "GSMSum", formatNumber(datatable[i]['GSMSum']));
-        equipmentSum+=datatable[i]['GSMSum'];
-        await updateTextInFrame(row, "GuaranteeSum", formatNumber(datatable[i]['GuaranteeSum']));
-        equipmentSum+=datatable[i]['GuaranteeSum'];
-        await updateTextInFrame(row, "DispatcherSum", formatNumber(datatable[i]['DispatcherSum']));
-        equipmentSum+=datatable[i]['DispatcherSum'];
-        await updateTextInFrame(row, "VisitSum", formatNumber(datatable[i]['VisitSum']));
-        equipmentSum+=datatable[i]['VisitSum'];
-        await updateTextInFrame(row, "BatterySum", formatNumber(datatable[i]['BatterySum']));
-        equipmentSum+=datatable[i]['BatterySum'];
-        await updateTextInFrame(row, "VerifSum", formatNumber(datatable[i]['VerifSum']));
-        equipmentSum+=datatable[i]['VerifSum'];
-        i++;
+        const j = Number(row.name.slice(3,4))-1;
+        console.log(j);
+        await updateTextInFrame(row, "CloudSum", formatNumber(datatable[j]['CloudSum']));
+        equipmentSum+=datatable[j]['CloudSum'];
+        await updateTextInFrame(row, "GSMSum", formatNumber(datatable[j]['GSMSum']));
+        equipmentSum+=datatable[j]['GSMSum'];
+        await updateTextInFrame(row, "GuaranteeSum", formatNumber(datatable[j]['GuaranteeSum']));
+        equipmentSum+=datatable[j]['GuaranteeSum'];
+        await updateTextInFrame(row, "DispatcherSum", formatNumber(datatable[j]['DispatcherSum']));
+        equipmentSum+=datatable[j]['DispatcherSum'];
+        await updateTextInFrame(row, "VisitSum", formatNumber(datatable[j]['VisitSum']));
+        equipmentSum+=datatable[j]['VisitSum'];
+        await updateTextInFrame(row, "BatterySum", formatNumber(datatable[j]['BatterySum']));
+        equipmentSum+=datatable[j]['BatterySum'];
+        await updateTextInFrame(row, "VerifSum", formatNumber(datatable[j]['VerifSum']));
+        equipmentSum+=datatable[j]['VerifSum'];
       }
       await yieldToFigma();
     }
     await updateTextInFrame(clone,"MaaSsum", formatNumber(equipmentSum));
-    await updateTextInFrame(clone,"sumPerMonth", formatNumber(Math.ceil(equipmentSum/4/12)));
+    await updateTextInFrame(clone,"sumPerMonth", formatNumber(info['ServiceSum']-info['RentSum']));
+    await updateTextInFrame(clone,"perDay", formatNumber(info['ServiceSumPerDay']));
     
     return clone;
   
@@ -278,17 +282,19 @@ export async function createOperationalCostsSlide(info) {
 
   await updateTextInFrame(clone, "GSMSumMonthly", formatNumber(info['GSMSumMonthly']));
   opCostMonthly+=info['GSMSumMonthly'];
+  console.log(opCostMonthly);
   await updateTextInFrame(clone, "GuaranteeSumMonthly", formatNumber(info['GuaranteeSumMonthly']));
   opCostMonthly+=info['GuaranteeSumMonthly'];
+  console.log(opCostMonthly);
   await updateTextInFrame(clone, "DispatcherSumMonthly", formatNumber(info['DispatcherSumMonthly']));
   opCostMonthly+=info['DispatcherSumMonthly'];
+  console.log(opCostMonthly);
   await updateTextInFrame(clone, "VisitSumMonthly", formatNumber(info['VisitSumMonthly']));
   opCostMonthly+=info['VisitSumMonthly'];
+  console.log(opCostMonthly);
   await updateTextInFrame(clone, "BatterySum", formatNumber(info['BatterySum']));
-  opCostMonthly+=info['BatterySum'];
   await updateTextInFrame(clone, "VerifSum", formatNumber(info['VerifSum']));
-  opCostMonthly+=info['VerifSum'];
-  await updateTextInFrame(clone, "opCostMonthly", formatNumber(info['opCostMonthly']));
+  await updateTextInFrame(clone, "opCostMonthly", formatNumber(opCostMonthly));
   await yieldToFigma();
 
   return clone;

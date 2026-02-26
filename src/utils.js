@@ -45,6 +45,7 @@ export function getVariantsProduct() {
 }
 
 export function formatNumber(num) {
+  num = Math.floor(num);
   return num
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");

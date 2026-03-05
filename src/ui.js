@@ -47,7 +47,7 @@ async function somefunction() {
     showScreen("second");
 
     try {
-        console.log(JSON.parse(raw).products);
+
         const selectedPresentation = presentations[Number(document.getElementById("presentationSelect").value)];
         const client = document.getElementById("client").value;
         if (!client) {
@@ -62,10 +62,19 @@ async function somefunction() {
         });
         finalVersion = new Map([...finalVersion.entries()].sort(([keyA], [keyB]) => keyA - keyB));
         const dataJSON = JSON.parse(raw);
+        if (dataJSON.products == undefined) {
+            throw new Error("Нет товаров");
+        }
+        if (dataJSON.maas == undefined) {
+            throw new Error("Нет данных о MaaS");
+        }
+        if (dataJSON.operationalCosts == undefined) {
+            throw new Error("Нет данных о стоимости услуг");
+        }
 
         const data = {
             client: client,
-            products: dataJSON.products,
+            products: (dataJSON.products || []),
             slides: [...finalVersion.values()],
             MaaSinfo: dataJSON.maas,
             operationalCosts: dataJSON.operationalCosts,

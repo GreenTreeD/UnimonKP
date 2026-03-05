@@ -103,7 +103,6 @@ async function updateTextInFrame(frame, textLayerName, newValue) {
   }
   const textNodes = frame.findAll(n => n.type === "TEXT" && n.name === textLayerName);
   if (textNodes.length === 0) {
-    console.log('textNodes.length === 0', textLayerName);
     return false;
   }
   for (const item of textNodes) {
@@ -223,28 +222,23 @@ export async function createRentalSlide(info) {
     clone.name = "RENTAL_CLONE";
 
     await yieldToFigma();
-
-    console.log("a");
     await updateTextInFrame(clone, "ConfigSum", formatNumber(info['ConfigSum']));
-    console.log("b");
     await updateTextInFrame(clone, "RentSum", formatNumber(info['RentSum']));
-    console.log("c");
     await updateTextInFrame(clone, "ServiceSum", formatNumber(info['ServiceSum']));
-    console.log("d");
 
     await yieldToFigma();
 
     const table = clone.findOne(n => n.name === "table");
-    console.log("table", table.children);
+
     const datatable = info['table'];
-    console.log("datatable",datatable);
+
 
     let equipmentSum = 0;
     for (const row of table.children) {
 
       if (row.name.startsWith("row")) {
         const j = Number(row.name.slice(3,4))-1;
-        console.log(j);
+
         await updateTextInFrame(row, "CloudSum", formatNumber(datatable[j]['CloudSum']));
         equipmentSum+=datatable[j]['CloudSum'];
         await updateTextInFrame(row, "GSMSum", formatNumber(datatable[j]['GSMSum']));
@@ -282,16 +276,16 @@ export async function createOperationalCostsSlide(info) {
 
   await updateTextInFrame(clone, "GSMSumMonthly", formatNumber(info['GSMSumMonthly']));
   opCostMonthly+=info['GSMSumMonthly'];
-  console.log(opCostMonthly);
+
   await updateTextInFrame(clone, "GuaranteeSumMonthly", formatNumber(info['GuaranteeSumMonthly']));
   opCostMonthly+=info['GuaranteeSumMonthly'];
-  console.log(opCostMonthly);
+
   await updateTextInFrame(clone, "DispatcherSumMonthly", formatNumber(info['DispatcherSumMonthly']));
   opCostMonthly+=info['DispatcherSumMonthly'];
-  console.log(opCostMonthly);
+
   await updateTextInFrame(clone, "VisitSumMonthly", formatNumber(info['VisitSumMonthly']));
   opCostMonthly+=info['VisitSumMonthly'];
-  console.log(opCostMonthly);
+
   await updateTextInFrame(clone, "BatterySum", formatNumber(info['BatterySum']));
   await updateTextInFrame(clone, "VerifSum", formatNumber(info['VerifSum']));
   await updateTextInFrame(clone, "opCostMonthly", formatNumber(opCostMonthly));

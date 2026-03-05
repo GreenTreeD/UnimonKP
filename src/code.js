@@ -54,7 +54,7 @@ figma.ui.onmessage = async (msg) => {
           let slideNum = 1;
           let y = 0;
           
-          console.log("Копирование базовой презентации1");
+          //console.log("Копирование базовой презентации1");
           for (const slideID of data['slides']) {
             const slideTarget = await findSlide(slideID);
             if (!slideTarget) {
@@ -71,7 +71,7 @@ figma.ui.onmessage = async (msg) => {
             
             yieldToFigma();
           }
-          console.log("Копирование базовой презентации2");
+          //console.log("Копирование базовой презентации2");
 
           // слайды с описанием оборудования
           const productSlides = getProductSlides();
@@ -102,7 +102,7 @@ figma.ui.onmessage = async (msg) => {
           yieldToFigma();
 
           // слайд про эксплуатационные расходы
-          console.log(data["operationalCosts"]);
+          //console.log(data["operationalCosts"]);
           const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
           newPage.appendChild(operationalCostsclone);
           operationalCostsclone.name = `${slideNum}`;
@@ -111,11 +111,11 @@ figma.ui.onmessage = async (msg) => {
 
           y += operationalCostsclone.height + 60;
           slideNum+=1;
-          console.log("слайд про operationalCosts2");
+          //console.log("слайд про operationalCosts2");
           yieldToFigma();
 
           // слайд rental
-          console.log("слайд rental1");
+          //console.log("слайд rental1");
           const rentalClone = await createRentalSlide(data['MaaSinfo']);
           newPage.appendChild(rentalClone);
           rentalClone.name = `${slideNum}`;
@@ -124,11 +124,11 @@ figma.ui.onmessage = async (msg) => {
 
           y += rentalClone.height + 60;
           slideNum+=1;
-          console.log("слайд rental2");
+          //console.log("слайд rental2");
 
           yieldToFigma();
 
-          console.log("слайд про МааС1");
+          //console.log("слайд про МааС1");
           // слайд про МааС
           const MaaSclone = getMaaSpage().clone();
           newPage.appendChild(MaaSclone);
@@ -138,11 +138,11 @@ figma.ui.onmessage = async (msg) => {
 
           y += MaaSclone.height + 60;
           slideNum+=1;
-          console.log("слайд про МааС2");
+          //console.log("слайд про МааС2");
 
           yieldToFigma();
 
-          console.log("слайд про operationalCosts1");
+          //console.log("слайд про operationalCosts1");
      
 
           // слайд с контактами
@@ -156,7 +156,7 @@ figma.ui.onmessage = async (msg) => {
           contactClone.name = `${slideNum}`;
           contactClone.x = 0;
           contactClone.y = y;
-          console.log(contactSlides);
+          //console.log(contactSlides);
 
           yieldToFigma();
 
@@ -169,7 +169,7 @@ figma.ui.onmessage = async (msg) => {
 
 
         } catch (err) {
-          console.error(err);
+          //console.error(err);
           figma.ui.postMessage({
             type: "showError",
             err

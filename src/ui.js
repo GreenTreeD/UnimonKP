@@ -71,6 +71,9 @@ async function somefunction() {
         if (dataJSON.operationalCosts == undefined) {
             throw new Error("Нет данных о стоимости услуг");
         }
+        if (dataJSON.link == undefined) {
+            throw new Error("Нет ссылки");
+        }
 
         const data = {
             client: client,
@@ -78,7 +81,8 @@ async function somefunction() {
             slides: [...finalVersion.values()],
             MaaSinfo: dataJSON.maas,
             operationalCosts: dataJSON.operationalCosts,
-            creator: document.getElementById('workerSelect').value
+            creator: document.getElementById('workerSelect').value,
+            link: dataJSON.link
         };
 
         parent.postMessage(

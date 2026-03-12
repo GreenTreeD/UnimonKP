@@ -150,9 +150,16 @@ export async function createKPSlide(data) {
             //"Price#70:4": formatNumber(element[3]), 
             "Value#70:5": formatNumber(element[1]*element[3])
             });
+          if (element[0] == "US-Maintenance") {
+            sumAnnual+=element[1]*element[3];
+            frameAService.appendChild(instance);
+            frameAService.appendChild(putRectangle());
+          }
+          else {
             sumKP+= element[1]*element[3];
             frameKVService.appendChild(instance);
             frameKVService.appendChild(putRectangle());
+          }
             break;
         }
         case 'CC-': 

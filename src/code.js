@@ -50,9 +50,26 @@ figma.ui.onmessage = async (msg) => {
             throw new Error("Empty presentation");
           };
 
+          //ссылка
+
+          const text = figma.createText();
+          await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+
+          text.characters = "Ссылка на расчёты";
+          text.setRangeHyperlink(0, text.characters.length, {
+            type: "URL",
+            value: data['link']
+          });
+          text.fills = [{type: "SOLID", color: { r: 1, g: 1, b: 1 }}];
+          text.fontSize = 120;
+          newPage.appendChild(text);
+          text.x = 0;
+          text.y = 0;
+
+
           // слайды из презентации
           let slideNum = 1;
-          let y = 0;
+          let y = 250;
           
           //console.log("Копирование базовой презентации1");
           for (const slideID of data['slides']) {
@@ -170,6 +187,8 @@ figma.ui.onmessage = async (msg) => {
 
         } catch (err) {
           //console.error(err);
+          const currentPage = figma.currentPage;
+          let tmp = currentPage.fing(node => node.name ==  "");
           figma.ui.postMessage({
             type: "showError",
             err

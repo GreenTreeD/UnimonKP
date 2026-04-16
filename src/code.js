@@ -79,7 +79,7 @@ figma.ui.onmessage = async (msg) => {
               throw new Error(`No slide for ${slideID}`);
             }
             const slideClone = slideTarget.clone();
-            slideClone.name = `${slideNum}`;
+            slideClone.name = `${String(slideNum).padStart(3, '0')}`;
             newPage.appendChild(slideClone);
             slideClone.x = 0;
             slideClone.y = y;
@@ -97,7 +97,7 @@ figma.ui.onmessage = async (msg) => {
             if (productSlide) {
              const productSlideClone = productSlide.clone();
               newPage.appendChild(productSlideClone);
-              productSlideClone.name = `${slideNum}`;
+              productSlideClone.name = `${String(slideNum).padStart(3, '0')}`;
               productSlideClone.x = 0;
               productSlideClone.y = y;
               y += productSlideClone.height + 60;
@@ -110,7 +110,7 @@ figma.ui.onmessage = async (msg) => {
           let KPframe = await createKPSlide(data['products']);
           const KPclone = KPframe.clone();
           newPage.appendChild(KPclone);
-          KPclone.name = `${slideNum}`;
+          KPclone.name = `${String(slideNum).padStart(3, '0')}`;
           KPclone.x = 0;
           KPclone.y = y;
 
@@ -122,7 +122,7 @@ figma.ui.onmessage = async (msg) => {
           //console.log(data["operationalCosts"]);
           const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
           newPage.appendChild(operationalCostsclone);
-          operationalCostsclone.name = `${slideNum}`;
+          operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
           operationalCostsclone.x = 0;
           operationalCostsclone.y = y;
 
@@ -135,7 +135,7 @@ figma.ui.onmessage = async (msg) => {
           //console.log("слайд rental1");
           const rentalClone = await createRentalSlide(data['MaaSinfo']);
           newPage.appendChild(rentalClone);
-          rentalClone.name = `${slideNum}`;
+          rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
           rentalClone.x = 0;
           rentalClone.y = y;
 
@@ -149,7 +149,7 @@ figma.ui.onmessage = async (msg) => {
           // слайд про МааС
           const MaaSclone = getMaaSpage().clone();
           newPage.appendChild(MaaSclone);
-          MaaSclone.name = `${slideNum}`;
+          MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
           MaaSclone.x = 0;
           MaaSclone.y = y;
 
@@ -170,7 +170,7 @@ figma.ui.onmessage = async (msg) => {
           }
           const contactClone = contactSlide.clone();
           newPage.appendChild(contactClone);
-          contactClone.name = `${slideNum}`;
+          contactClone.name = `${String(slideNum).padStart(3, '0')}`;
           contactClone.x = 0;
           contactClone.y = y;
           //console.log(contactSlides);
@@ -185,8 +185,36 @@ figma.ui.onmessage = async (msg) => {
           await figma.setCurrentPageAsync(newPage);
 
 
+          
+
+          const todate = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date_cover");
+          if (todate != null) {
+            await figma.loadFontAsync(todate.fontName);
+            await yieldToFigma();
+            const months = [
+              'января', 'февраля', 'марта', 'апреля',
+              'мая', 'июня', 'июля', 'августа',
+              'сентября', 'октября', 'ноября', 'декабря'
+            ];
+            todate.characters = `${curDate.getDate()} ${months[curDate.getMonth()]} ${curDate.getFullYear()} г.`;
+          }
+          const date_till = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date");   
+          if (date_till != null) {
+            const now = new Date();
+            now.setDate(now.getDate() + 14);
+
+            const day = now.getDate();
+            const month = now.getMonth();
+
+            const months = [ "янв", "февр", "март", "апр", "май", "июнь", "июль", "авг", "сент", "окт", "нояб", "дек"];
+
+            await figma.loadFontAsync(date_till.fontName);
+            await yieldToFigma();
+            date_till.characters = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} г.`;
+          }
+
         } catch (err) {
-          //console.error(err);
+          console.error(err);
           const currentPage = figma.currentPage;
           let tmp = currentPage.fing(node => node.name ==  "");
           figma.ui.postMessage({
@@ -250,7 +278,7 @@ figma.ui.onmessage = async (msg) => {
       let images = [];
       for (const frame of page.children) {
         if (frame.type === "FRAME") {
-          const png = await frame.exportAsync({ format: "PNG", scale: 1 });
+          const png = await frame.exportAsync({ format: "JPG", scale: 1 });
           images.push({ name: frame.name, bytes: png });
         }
         yieldToFigma();

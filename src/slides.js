@@ -63,12 +63,13 @@ async function deleteLast(frame) {
 }
 
 export async function loadOldSlides() {
-  const pageRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$");
+  const pageRegex = new RegExp(/^[A-Za-zА-Яа-яЁё_0-9]+ \d{2}:\d{2} \d{2}\.\d{2}\.\d{4}$/);
   const pages = figma.root.children.filter(n => pageRegex.test(n.name));
   let exportList = [];
   for (const item of pages){
     exportList.push({id: item.id, name: item.name})
   }
+  console.log(exportList);
   return exportList;  
 }
 

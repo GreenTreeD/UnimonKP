@@ -76,7 +76,8 @@ async function somefunction() {
         }
 
         const data = {
-            client: client,
+            client: client.trim().replace(/\s+/g, "_"),
+            KPtype: document.getElementById('KPtype').value,
             products: (dataJSON.products || []),
             slides: [...finalVersion.values()],
             MaaSinfo: dataJSON.maas,

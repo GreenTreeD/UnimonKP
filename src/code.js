@@ -106,62 +106,126 @@ figma.ui.onmessage = async (msg) => {
             yieldToFigma();
           }
 
-          // слайд с кп
-          let KPframe = await createKPSlide(data['products']);
-          const KPclone = KPframe.clone();
-          newPage.appendChild(KPclone);
-          KPclone.name = `${String(slideNum).padStart(3, '0')}`;
-          KPclone.x = 0;
-          KPclone.y = y;
+          switch (data['KPtype']) {
+            case "both": {
+            // слайд с кп
+              let KPframe = await createKPSlide(data['products']);
+              const KPclone = KPframe.clone();
+              newPage.appendChild(KPclone);
+              KPclone.name = `${String(slideNum).padStart(3, '0')}`;
+              KPclone.x = 0;
+              KPclone.y = y;
 
-          y += KPclone.height + 60;
-          slideNum+=1;
-          yieldToFigma();
+              y += KPclone.height + 60;
+              slideNum+=1;
+              yieldToFigma();
 
-          // слайд про эксплуатационные расходы
-          //console.log(data["operationalCosts"]);
-          const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
-          newPage.appendChild(operationalCostsclone);
-          operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
-          operationalCostsclone.x = 0;
-          operationalCostsclone.y = y;
+              // слайд про эксплуатационные расходы
+              //console.log(data["operationalCosts"]);
+              const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
+              newPage.appendChild(operationalCostsclone);
+              operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
+              operationalCostsclone.x = 0;
+              operationalCostsclone.y = y;
 
-          y += operationalCostsclone.height + 60;
-          slideNum+=1;
-          //console.log("слайд про operationalCosts2");
-          yieldToFigma();
+              y += operationalCostsclone.height + 60;
+              slideNum+=1;
+              //console.log("слайд про operationalCosts2");
+              yieldToFigma();
 
-          // слайд rental
-          //console.log("слайд rental1");
-          const rentalClone = await createRentalSlide(data['MaaSinfo']);
-          newPage.appendChild(rentalClone);
-          rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
-          rentalClone.x = 0;
-          rentalClone.y = y;
+              // слайд rental
+              //console.log("слайд rental1");
+              const rentalClone = await createRentalSlide(data['MaaSinfo']);
+              newPage.appendChild(rentalClone);
+              rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
+              rentalClone.x = 0;
+              rentalClone.y = y;
 
-          y += rentalClone.height + 60;
-          slideNum+=1;
-          //console.log("слайд rental2");
+              y += rentalClone.height + 60;
+              slideNum+=1;
+              //console.log("слайд rental2");
 
-          yieldToFigma();
+              yieldToFigma();
 
-          //console.log("слайд про МааС1");
-          // слайд про МааС
-          const MaaSclone = getMaaSpage().clone();
-          newPage.appendChild(MaaSclone);
-          MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
-          MaaSclone.x = 0;
-          MaaSclone.y = y;
+              //console.log("слайд про МааС1");
+              // слайд про МааС
+              const MaaSclone = getMaaSpage().clone();
+              newPage.appendChild(MaaSclone);
+              MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
+              MaaSclone.x = 0;
+              MaaSclone.y = y;
 
-          y += MaaSclone.height + 60;
-          slideNum+=1;
-          //console.log("слайд про МааС2");
+              y += MaaSclone.height + 60;
+              slideNum+=1;
+              //console.log("слайд про МааС2");
 
-          yieldToFigma();
+              yieldToFigma();
 
-          //console.log("слайд про operationalCosts1");
-     
+              //console.log("слайд про operationalCosts1");
+              break;
+            }
+            case "sell" : {
+              // слайд с кп
+              let KPframe = await createKPSlide(data['products']);
+              const KPclone = KPframe.clone();
+              newPage.appendChild(KPclone);
+              KPclone.name = `${String(slideNum).padStart(3, '0')}`;
+              KPclone.x = 0;
+              KPclone.y = y;
 
+              y += KPclone.height + 60;
+              slideNum+=1;
+              yieldToFigma();
+              break;
+            }
+            case "maas": {
+              // слайд про эксплуатационные расходы
+              //console.log(data["operationalCosts"]);
+              const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
+              newPage.appendChild(operationalCostsclone);
+              operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
+              operationalCostsclone.x = 0;
+              operationalCostsclone.y = y;
+
+              y += operationalCostsclone.height + 60;
+              slideNum+=1;
+              //console.log("слайд про operationalCosts2");
+              yieldToFigma();
+
+              // слайд rental
+              //console.log("слайд rental1");
+              const rentalClone = await createRentalSlide(data['MaaSinfo']);
+              newPage.appendChild(rentalClone);
+              rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
+              rentalClone.x = 0;
+              rentalClone.y = y;
+
+              y += rentalClone.height + 60;
+              slideNum+=1;
+              //console.log("слайд rental2");
+
+              yieldToFigma();
+
+              //console.log("слайд про МааС1");
+              // слайд про МааС
+              const MaaSclone = getMaaSpage().clone();
+              newPage.appendChild(MaaSclone);
+              MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
+              MaaSclone.x = 0;
+              MaaSclone.y = y;
+
+              y += MaaSclone.height + 60;
+              slideNum+=1;
+              //console.log("слайд про МааС2");
+
+              yieldToFigma();
+              break;
+            }
+            case "maassmall": {
+              break;
+            }
+
+          }
           // слайд с контактами
           const contactSlides = getContactSlides();
           const contactSlide = contactSlides.children.find(node => node.name === data['creator']);
@@ -183,10 +247,6 @@ figma.ui.onmessage = async (msg) => {
           });
           
           await figma.setCurrentPageAsync(newPage);
-
-
-          
-
           const todate = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date_cover");
           if (todate != null) {
             await figma.loadFontAsync(todate.fontName);
@@ -216,7 +276,7 @@ figma.ui.onmessage = async (msg) => {
         } catch (err) {
           console.error(err);
           const currentPage = figma.currentPage;
-          let tmp = currentPage.fing(node => node.name ==  "");
+          let tmp = currentPage.find(node => node.name ==  "");
           figma.ui.postMessage({
             type: "showError",
             err
@@ -275,12 +335,20 @@ figma.ui.onmessage = async (msg) => {
         });
         return;        
       }
+      const frames = page.children
+        .filter(node => node.type === "FRAME");
+
+      frames.sort((a, b) => {
+        const numA = parseInt(a.name, 10);
+        const numB = parseInt(b.name, 10);
+        return numA - numB;
+      });
       let images = [];
-      for (const frame of page.children) {
-        if (frame.type === "FRAME") {
-          const png = await frame.exportAsync({ format: "JPG", scale: 1 });
-          images.push({ name: frame.name, bytes: png });
-        }
+      for (const frame of frames) {
+
+        const png = await frame.exportAsync({ format: "JPG", scale: 1 });
+        images.push({ name: frame.name, bytes: png });
+
         yieldToFigma();
       }
 

@@ -115,7 +115,7 @@ async function updateTextInFrame(frame, textLayerName, newValue) {
 }
 
 
-export async function createKPSlide(data) {
+export async function createKPSlide(data, type) {
   let result = await createNextKP();
   
   if (!result) {

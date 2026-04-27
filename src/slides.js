@@ -2,12 +2,22 @@
 import { yieldToFigma, formatNumber, getVariantsProduct } from "./utils.js";
 
 
-async function createNextKP() {
+async function createNextKP(type) {
   const curPage = figma.root.children.find(p => p.name === "Assets");
   if (!curPage) return null;
 
-  const templateName = "KP_example";
-  const prefix = "KP";
+  let templateName = null;
+  let prefix = null;
+  if (type == "maas") {
+
+    templateName = "MaaSKP_example";
+    prefix = "MaaSKP";
+  }
+  else {
+    templateName = "KP_example";
+    prefix = "KP";
+  }
+
   const regex = new RegExp(`^${prefix}\\d+$`);
 
   const template = curPage.children.find(
@@ -46,9 +56,14 @@ async function createNextKP() {
   return { frame: kpFrame, index };
 }
 
-function putRectangle() {
+function putRectangle(size) {
   const rect = figma.createRectangle();
-  rect.resize(1030, 2);
+  if (size == "small") {
+    rect.resize(1030, 2);
+  } else {
+    rect.resize(1540, 2);
+  }
+  
   rect.fills = [{ type: "SOLID", color: { r: 198 / 255, g: 207 / 255, b: 213 / 255 } }];
   return rect;
 }
@@ -64,7 +79,7 @@ async function deleteLast(frame) {
 
 export async function loadOldSlides() {
   const pageRegex = new RegExp(/^[A-Za-zА-Яа-яЁё_0-9]+ \d{2}:\d{2} \d{2}\.\d{2}\.\d{4}$/);
-  const pages = figma.root.children.filter(n => pageRegex.test(n.name));
+  const pages = figma.root.children.filter(page => (page.name != "Assets" & page.name != "Presentations"));
   let exportList = [];
   for (const item of pages){
     exportList.push({id: item.id, name: item.name})
@@ -116,7 +131,7 @@ async function updateTextInFrame(frame, textLayerName, newValue) {
 
 
 export async function createKPSlide(data, type) {
-  let result = await createNextKP();
+  let result = await createNextKP(type);
   
   if (!result) {
     figma.notify("Фрейм не найден");
@@ -124,82 +139,124 @@ export async function createKPSlide(data, type) {
   }
   
   const { frame, index } = result;
-  const frameKVProduct = frame.findOne(node => node.name === "KP_KV_products");
-  const frameKVService = frame.findOne(node => node.name === "KP_KV_services");
-  const frameAService = frame.findOne(node => node.name === "annual_services");
-  
   await yieldToFigma();
-  let sumKP = 0;
-  let sumAnnual = 0;
-
   if (!data) {
     return null;
   }
   const variantsProduct = getVariantsProduct();
-  for (const element of data) {
-    let variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === element[0]);
- 
-    if (!variant) {
-        variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === "Default");
-        figma.notify("Вариант не найден");
+  if (type != 'maas') {
+    let sumKP = 0;
+    let sumAnnual = 0;
+    const frameKVProduct = frame.findOne(node => node.name === "KP_KV_products");
+    const frameKVService = frame.findOne(node => node.name === "KP_KV_services");
+    const frameAService = frame.findOne(node => node.name === "annual_services");
+    for (const element of data) {
+      let variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === element[0]);
+  
+      if (!variant) {
+          variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === "Default");
+          figma.notify("Вариант не найден");
+        }
+      const instance = variant.createInstance();
+      switch (element[0].slice(0,3)) {
+          case 'US-': {
+              instance.setProperties({ 
+              //"Count#70:3": String(element[1]), 
+              //"Price#70:4": formatNumber(element[3]), 
+              "Value#70:5": formatNumber(element[1]*element[3])
+              });
+            if (element[0] == "US-Maintenance") {
+              sumAnnual+=element[1]*element[3];
+              frameAService.appendChild(instance);
+              frameAService.appendChild(putRectangle("small"));
+            }
+            else {
+              sumKP+= element[1]*element[3];
+              frameKVService.appendChild(instance);
+              frameKVService.appendChild(putRectangle("small"));
+            }
+              break;
+          }
+          case 'CC-': 
+          case 'CL-': {
+              instance.setProperties({ 
+              "Count#70:3": String(element[1]), 
+              "Price#70:4": formatNumber(element[3]), 
+              "Value#70:5": formatNumber(element[1]*element[3])
+              });
+              sumAnnual+=element[1]*element[3];
+              frameAService.appendChild(instance);
+              frameAService.appendChild(putRectangle("small"));
+              break;
+          }
+          default: {
+              instance.setProperties({ 
+              "Count#70:3": String(element[1]), 
+              "Price#70:4": formatNumber(element[3]), 
+              "Value#70:5": formatNumber(element[1]*element[3])
+              });
+              sumKP+= element[1]*element[3];
+              frameKVProduct.appendChild(instance);
+              frameKVProduct.appendChild(putRectangle("small"));
+          }
       }
-    const instance = variant.createInstance();
-    switch (element[0].slice(0,3)) {
-        case 'US-': {
-            instance.setProperties({ 
-            //"Count#70:3": String(element[1]), 
-            //"Price#70:4": formatNumber(element[3]), 
-            "Value#70:5": formatNumber(element[1]*element[3])
-            });
-          if (element[0] == "US-Maintenance") {
-            sumAnnual+=element[1]*element[3];
-            frameAService.appendChild(instance);
-            frameAService.appendChild(putRectangle());
-          }
-          else {
-            sumKP+= element[1]*element[3];
-            frameKVService.appendChild(instance);
-            frameKVService.appendChild(putRectangle());
-          }
-            break;
-        }
-        case 'CC-': 
-        case 'CL-': {
-            instance.setProperties({ 
-            "Count#70:3": String(element[1]), 
-            "Price#70:4": formatNumber(element[3]), 
-            "Value#70:5": formatNumber(element[1]*element[3])
-            });
-            sumAnnual+=element[1]*element[3];
-            frameAService.appendChild(instance);
-            frameAService.appendChild(putRectangle());
-            break;
-        }
-        default: {
-            instance.setProperties({ 
-            "Count#70:3": String(element[1]), 
-            "Price#70:4": formatNumber(element[3]), 
-            "Value#70:5": formatNumber(element[1]*element[3])
-            });
-            sumKP+= element[1]*element[3];
-            frameKVProduct.appendChild(instance);
-            frameKVProduct.appendChild(putRectangle());
-        }
+      await yieldToFigma();
     }
-    await yieldToFigma();
+
+    deleteLast(frameKVService);
+    deleteLast(frameAService);
+    deleteLast(frameKVProduct);
+
+    if (frameKVService.children.length == 0) {
+      frameKVService.visible = false;
+    }
+
+    await updateTextInFrame(frame, "sumKV", formatNumber(sumKP));
+    await updateTextInFrame(frame, "sumAnnual", formatNumber(sumAnnual));
   }
+  else {
+    let sumMonthly = 0;
+    let sumStart = 0;
+    const frameKVProduct = frame.findOne(node => node.name === "KP_KV_products");
+    for (const element of data) {
+      let variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === element[0]);
+  
+      if (!variant) {
+          variant = variantsProduct.children.find(v => v.variantProperties["Variant"] === "Default");
+          figma.notify("Вариант не найден");
+        }
+      const instance = variant.createInstance();
+      switch (element[0].slice(0,3)) {
+          case 'US-':
+          {
+            if (element[0] == "US-Setup" || element[0] == "US-Install") {
+              sumStart+=element[3];
+            }
+            break;
+          }
+          case 'CC-': 
+          case 'CL-': {
+              break;
+          }
+          default: {
+              instance.setProperties({ 
+              "Count#70:3": String(element[1]), 
+              "Price#70:4": formatNumber(element[4]), 
+              "Value#70:5": formatNumber(element[1]*element[4])
+              });
+              sumMonthly+= element[1]*element[4];
+              instance.resize(1630, instance.height);
+              frameKVProduct.appendChild(instance);
+              frameKVProduct.appendChild(putRectangle("big"));
+          }
+      }
+      await yieldToFigma();
+    }
+    deleteLast(frameKVProduct);
+    await updateTextInFrame(frame, "RentSum", formatNumber(sumMonthly));
+    await updateTextInFrame(frame, "ConfigSum", formatNumber(sumStart));
 
-
-  deleteLast(frameKVService);
-  deleteLast(frameAService);
-  deleteLast(frameKVProduct);
-
-  if (frameKVService.children.length == 0) {
-    frameKVService.visible = false;
   }
-
-  await updateTextInFrame(frame, "sumKV", formatNumber(sumKP));
-  await updateTextInFrame(frame, "sumAnnual", formatNumber(sumAnnual));
 
   await yieldToFigma();
 

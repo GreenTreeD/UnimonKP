@@ -40,10 +40,11 @@ figma.ui.onmessage = async (msg) => {
         const data = msg.data;
 
         try {
+          console.log(data);
 
           let newPage = figma.createPage();
           let curDate = new Date();
-          newPage.name = String(`${data['client']} ${String(curDate.getHours()).padStart(2, '0')}:${String(curDate.getMinutes()).padStart(2, '0')} ${String(curDate.getDate()).padStart(2, '0')}.${String(curDate.getMonth()+1).padStart(2, '0')}.${curDate.getFullYear()}`);
+          newPage.name = String(`${data['client']} ${String(curDate.getDate()).padStart(2, '0')}.${String(curDate.getMonth()+1).padStart(2, '0')}.${curDate.getFullYear()}`);
 
           if (!data['slides']) {
             figma.notify("Пустая презентация");
@@ -120,8 +121,6 @@ figma.ui.onmessage = async (msg) => {
               slideNum+=1;
               yieldToFigma();
 
-              // слайд про эксплуатационные расходы
-              //console.log(data["operationalCosts"]);
               const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
               newPage.appendChild(operationalCostsclone);
               operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
@@ -130,11 +129,9 @@ figma.ui.onmessage = async (msg) => {
 
               y += operationalCostsclone.height + 60;
               slideNum+=1;
-              //console.log("слайд про operationalCosts2");
+
               yieldToFigma();
 
-              // слайд rental
-              //console.log("слайд rental1");
               const rentalClone = await createRentalSlide(data['MaaSinfo']);
               newPage.appendChild(rentalClone);
               rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
@@ -143,12 +140,9 @@ figma.ui.onmessage = async (msg) => {
 
               y += rentalClone.height + 60;
               slideNum+=1;
-              //console.log("слайд rental2");
 
               yieldToFigma();
 
-              //console.log("слайд про МааС1");
-              // слайд про МааС
               const MaaSclone = getMaaSpage().clone();
               newPage.appendChild(MaaSclone);
               MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
@@ -157,16 +151,17 @@ figma.ui.onmessage = async (msg) => {
 
               y += MaaSclone.height + 60;
               slideNum+=1;
-              //console.log("слайд про МааС2");
 
               yieldToFigma();
 
-              //console.log("слайд про operationalCosts1");
               break;
             }
-            case "sell" : {
-              // слайд с кп
-              let KPframe = await createKPSlide(data['products']);
+
+            case "sell":
+            case "maas":
+            {
+              let KPframe = await createKPSlide(data['products'], data['KPtype']);
+              console.log(KPframe);
               const KPclone = KPframe.clone();
               newPage.appendChild(KPclone);
               KPclone.name = `${String(slideNum).padStart(3, '0')}`;
@@ -178,53 +173,6 @@ figma.ui.onmessage = async (msg) => {
               yieldToFigma();
               break;
             }
-            case "maas": {
-              // слайд про эксплуатационные расходы
-              //console.log(data["operationalCosts"]);
-              const operationalCostsclone = await createOperationalCostsSlide(data["operationalCosts"]);
-              newPage.appendChild(operationalCostsclone);
-              operationalCostsclone.name = `${String(slideNum).padStart(3, '0')}`;
-              operationalCostsclone.x = 0;
-              operationalCostsclone.y = y;
-
-              y += operationalCostsclone.height + 60;
-              slideNum+=1;
-              //console.log("слайд про operationalCosts2");
-              yieldToFigma();
-
-              // слайд rental
-              //console.log("слайд rental1");
-              const rentalClone = await createRentalSlide(data['MaaSinfo']);
-              newPage.appendChild(rentalClone);
-              rentalClone.name = `${String(slideNum).padStart(3, '0')}`;
-              rentalClone.x = 0;
-              rentalClone.y = y;
-
-              y += rentalClone.height + 60;
-              slideNum+=1;
-              //console.log("слайд rental2");
-
-              yieldToFigma();
-
-              //console.log("слайд про МааС1");
-              // слайд про МааС
-              const MaaSclone = getMaaSpage().clone();
-              newPage.appendChild(MaaSclone);
-              MaaSclone.name = `${String(slideNum).padStart(3, '0')}`;
-              MaaSclone.x = 0;
-              MaaSclone.y = y;
-
-              y += MaaSclone.height + 60;
-              slideNum+=1;
-              //console.log("слайд про МааС2");
-
-              yieldToFigma();
-              break;
-            }
-            case "maassmall": {
-              break;
-            }
-
           }
           // слайд с контактами
           const contactSlides = getContactSlides();
@@ -300,10 +248,9 @@ figma.ui.onmessage = async (msg) => {
       break;
     }
     case "deleteOld" : {
-      const newRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}:\\d{2} \\d{2}\\.\\d{2}\\.\\d{4}$");;
-      const pagesToRemove = figma.root.children.filter(page => newRegex.test(page.name));
+      const newRegex = new RegExp("^[A-Za-zА-Яа-яЁё]+ \\d{2}\\.\\d{2}\\.\\d{4}$");;
+      const pagesToRemove = figma.root.children.filter(page => (page.name != "Assets" & page.name != "Presentations"));
       if (pagesToRemove.length === 0) {
-        //figma.notify('Страницы с названием "Презентация" не найдены');
         return;
       }
       const currentPage = figma.currentPage;

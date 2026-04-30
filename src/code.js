@@ -204,7 +204,7 @@ figma.ui.onmessage = async (msg) => {
               'мая', 'июня', 'июля', 'августа',
               'сентября', 'октября', 'ноября', 'декабря'
             ];
-            todate.characters = `${curDate.getDate()} ${months[curDate.getMonth()]} ${curDate.getFullYear()} г.`;
+            todate.characters = `${String(curDate.getDate()).padStart(2, '0')} ${months[curDate.getMonth()]} ${curDate.getFullYear()} г.`;
           }
           const date_till = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date");   
           if (date_till != null) {
@@ -218,7 +218,16 @@ figma.ui.onmessage = async (msg) => {
 
             await figma.loadFontAsync(date_till.fontName);
             await yieldToFigma();
-            date_till.characters = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} г.`;
+            date_till.characters = `${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()} г.`;
+          }
+          const date_till_num = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date_num");   
+          if (date_till_num != null) {
+            const now = new Date();
+            now.setDate(now.getDate() + 14);
+            const month = now.getMonth();
+            await figma.loadFontAsync(date_till_num.fontName);
+            await yieldToFigma();
+            date_till_num.characters = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()).padStart(2, '0')}.${now.getFullYear()}`;
           }
 
         } catch (err) {

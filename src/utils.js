@@ -16,6 +16,7 @@ export async function initResources() {
     productSlides: assetsPage.findOne(n => n.type === "SECTION" && n.name === "productSlides"), // слайды с подробным описанием продуктов
     MaaSpage: assetsPage.findOne(n => n.type === "FRAME" && n.name === "MaaSdesc"), // слайд для МааS
   };
+  console.log(state);
   yieldToFigma();
   
   const allFound = Object.values(state).every(Boolean);

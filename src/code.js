@@ -185,6 +185,7 @@ figma.ui.onmessage = async (msg) => {
             throw new Error("No contact slide");
           }
           const contactClone = contactSlide.clone();
+          
           newPage.appendChild(contactClone);
           contactClone.name = `${String(slideNum).padStart(3, '0')}`;
           contactClone.x = 0;

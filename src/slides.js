@@ -285,7 +285,7 @@ export async function createKPSlide(data, type) {
 
 
 export async function findSlide(slideID) {
-  const page = figma.root.children.find(p => p.name == "Presentations");
+  const page = figma.root.children.find(p => p.name == "Assets").findOne(n => n.type === "SECTION" && n.name === "Presentations");
   let sld = undefined;
   
   for (const section of page.children) {

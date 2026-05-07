@@ -88,6 +88,7 @@ export async function loadOldSlides() {
   return exportList;  
 }
 
+/*
 export async function loadAllSlides() {
   const page = figma.root.children.find(p => p.name === "Presentations");
   if (!page) {      
@@ -107,6 +108,25 @@ export async function loadAllSlides() {
       slides = section.children.map(slide => [slide.name, slide.id]);
       presentations.push({section: section.name, slides}); 
     }
+    await yieldToFigma();
+  }
+
+  return presentations;
+}*/
+
+export async function loadAllSlides() {
+  const page = figma.root.children.find(p => p.name === "Assets");
+  if (!page) {      
+    figma.notify("Страница не найдена");
+      throw new Error("Page not found");
+  }
+  const presSection = page.findOne(n => n.type === "SECTION" && n.name === "Presentations");
+
+  const presentations = [];
+
+  for (const section of presSection.children) {
+    let slides = section.children.map(slide => [slide.name, slide.id]);
+    presentations.push({section: section.name, slides}); 
     await yieldToFigma();
   }
 
@@ -357,4 +377,16 @@ export async function createOperationalCostsSlide(info) {
   await yieldToFigma();
 
   return clone;
+}
+
+export async function loadAllContacts() {
+  const curPage = figma.root.children.find(p => p.name === "Assets");
+  if (!curPage) return null;
+
+  const section = curPage.findOne(n => n.type === "SECTION" && n.name === "ContactSlides");
+  if (!section) return null;
+  let contacts = [];
+  for (const slide of section.children) contacts.push(slide.name);
+  return contacts;
+
 }

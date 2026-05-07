@@ -1,6 +1,6 @@
 
 import { initResources, getContactSlides, getMaaSpage, getProductSlides, yieldToFigma } from "./utils.js";
-import { findSlide, createKPSlide, createRentalSlide, loadAllSlides, loadOldSlides, createOperationalCostsSlide} from "./slides.js";
+import { findSlide, createKPSlide, createRentalSlide, loadAllSlides, loadOldSlides, createOperationalCostsSlide, loadAllContacts} from "./slides.js";
 
 
 async function init() {
@@ -18,12 +18,16 @@ async function init() {
     figma.notify("Нет ресурсов для КП");
     return;
   }
-
+  const contacts = await loadAllContacts();
+  if (!contacts) {
+    figma.notify("Нет ресурсов для КП");
+    return;
+  }
   figma.showUI(__html__, { width: 320, height: 420 });
 
   figma.ui.postMessage({
     type:"slides",
-    data: JSON.stringify(presentations)
+    data: JSON.stringify({ presentations: presentations, contacts : contacts })
   });
 }
 
@@ -214,7 +218,7 @@ figma.ui.onmessage = async (msg) => {
             const day = now.getDate();
             const month = now.getMonth();
 
-            const months = [ "янв", "февр", "март", "апр", "май", "июнь", "июль", "авг", "сент", "окт", "нояб", "дек"];
+            const months = [ "янв", "февр", "март", "апр", "мая", "июня", "июля", "авг", "сент", "окт", "нояб", "дек"];
 
             await figma.loadFontAsync(date_till.fontName);
             await yieldToFigma();

@@ -82,7 +82,7 @@ async function somefunction() {
             slides: [...finalVersion.values()],
             MaaSinfo: dataJSON.maas,
             operationalCosts: dataJSON.operationalCosts,
-            creator: document.getElementById('workerSelect').value,
+            creator: contacts[Number(document.getElementById('workerSelect').value)],
             link: dataJSON.link
         };
 
@@ -107,10 +107,13 @@ window.onmessage = async (event) => {
     if (!msg) return;
 
     switch (msg.type) {
+        // выгрузка набора презентаций и контактов из доски
         case "slides": {
             const data = JSON.parse(msg.data);
-            const names = data.map(item => item.section);
-            data.forEach(presentation => {
+            console.log(data);
+            const names = data['presentations'].map(item => item.section);
+            console.log()
+            data['presentations'].forEach(presentation => {
                 let tmp = new Map(presentation.slides.map(([key, value]) => [Number(key), value]));
                 presentations.push(tmp);
             });
@@ -122,6 +125,18 @@ window.onmessage = async (event) => {
                 option.textContent = name;
                 select.appendChild(option);
                 i += 1;
+            });
+
+            i = 0;
+            const contactsData = data["contacts"];
+            select = document.getElementById("workerSelect");
+            contactsData.forEach(item => {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = item;
+                contacts.push(item);
+                select.appendChild(option);
+                i+=1;
             });
             showScreen("first");
             break;
@@ -214,3 +229,4 @@ window.addEventListener("DOMContentLoaded", (event) => {
 });
 
 let presentations = [];
+let contacts = [];

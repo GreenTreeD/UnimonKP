@@ -44,8 +44,6 @@ figma.ui.onmessage = async (msg) => {
         const data = msg.data;
 
         try {
-          console.log(data);
-
           let newPage = figma.createPage();
           let curDate = new Date();
           newPage.name = String(`${data['client']} ${String(curDate.getDate()).padStart(2, '0')}.${String(curDate.getMonth()+1).padStart(2, '0')}.${curDate.getFullYear()}`);
@@ -165,7 +163,6 @@ figma.ui.onmessage = async (msg) => {
             case "maas":
             {
               let KPframe = await createKPSlide(data['products'], data['KPtype']);
-              console.log(KPframe);
               const KPclone = KPframe.clone();
               newPage.appendChild(KPclone);
               KPclone.name = `${String(slideNum).padStart(3, '0')}`;
@@ -225,20 +222,18 @@ figma.ui.onmessage = async (msg) => {
             await yieldToFigma();
             date_till.characters = `${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()} г.`;
           }
-          const date_till_num = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date_num");   
+          const date_till_num = newPage.findOne(n => n.type === "TEXT" && n.name === "to_date_num");
           if (date_till_num != null) {
             const now = new Date();
             now.setDate(now.getDate() + 14);
             const month = now.getMonth();
             await figma.loadFontAsync(date_till_num.fontName);
             await yieldToFigma();
-            date_till_num.characters = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()).padStart(2, '0')}.${now.getFullYear()}`;
+            date_till_num.characters = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
           }
-
         } catch (err) {
           console.error(err);
           const currentPage = figma.currentPage;
-          let tmp = currentPage.find(node => node.name ==  "");
           figma.ui.postMessage({
             type: "showError",
             err
